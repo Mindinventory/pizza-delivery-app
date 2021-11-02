@@ -15,5 +15,11 @@ class PizzaChangedState extends PizzaState {
   PizzaChangedState();
 }
 
+class PizzaChangeSizeState extends PizzaState {
+  PizzaChangeSizeState(this.oldSize);
+  final PizzaSize oldSize;
+}
+
+
 
 

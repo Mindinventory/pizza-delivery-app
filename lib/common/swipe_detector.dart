@@ -30,7 +30,9 @@ class SwipeDetector extends StatelessWidget {
       startX=event.globalPosition.dx;
     },
       onHorizontalDragEnd: (event){
-        onSwipe(leftToRightSwipe!);
+        if(leftToRightSwipe!=null) {
+          onSwipe(leftToRightSwipe!);
+        }
       }
       ,
       child: child,
