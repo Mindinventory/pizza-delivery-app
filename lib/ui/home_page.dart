@@ -135,7 +135,7 @@ class _HomePageState extends State<HomePage> {
                 pizzaCubit.emit(PizzaChangedState());
               },
               builder: (context, double value,child){
-        final pizzaChangedSize=(value<0.2)?(pizzaSize-(value*(pizzaSize-prevPizzaSize))):prevPizzaSize;
+        final pizzaChangedSize=rightSwipe!=null?(value<0.3)?(pizzaSize-((value+0.7)*(pizzaSize-prevPizzaSize))):prevPizzaSize:pizzaSize;
                 return Stack(
                   alignment: Alignment.center,
                   children: [
@@ -155,7 +155,7 @@ class _HomePageState extends State<HomePage> {
                     Transform.translate(
                       offset:rightSwipe!=null ?Offset(value*(rightSwipe?(deviceWidth/2)+(prevPizzaSize/2):-((deviceWidth/2)+(prevPizzaSize/2))),0):const Offset(0, 0),
                       child: Transform.rotate(
-                        angle: pi*(value-0.2>0?value-0.2:0),
+                        angle: pi*((value-0.2)>0?value-0.2:0),
                         child: Image.asset(pizzaCubit.pizzaList[pizzaCubit.selectedPizza].imgPath,
                           width: pizzaChangedSize,
                           height: pizzaChangedSize,
@@ -167,7 +167,7 @@ class _HomePageState extends State<HomePage> {
                     Transform.translate(
                       offset: Offset((1-value)*(rightSwipe?-((deviceWidth/2)+(pizzaSize/2)):(deviceWidth/2)+(pizzaSize/2)),0),
                       child: Transform.rotate(
-                        angle:pi*(value-0.2>0?value-0.2:0),
+                        angle:pi*((value-0.4)>0?value-0.2:0),
                         child: Image.asset(pizzaCubit.pizzaList[pizzaCubit.selectedPizza+(rightSwipe?-1:1)].imgPath,
                           width: pizzaSize,
                           height: pizzaSize,
