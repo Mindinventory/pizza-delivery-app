@@ -1,3 +1,7 @@
+import 'dart:ui';
+
+import 'package:pizza_delivery/ui/custom_painters.dart';
+
 enum PizzaSize { small, medium, large }
 
 class PizzaViewModel {
@@ -20,6 +24,17 @@ class Topping {
   final String name;
   final String img;
   final String unitImg;
+  final List<Pos> positions;
 
-  Topping(this.name, this.img, this.unitImg);
+  Topping(this.name, this.img, this.unitImg, this.positions);
+}
+
+class ToppingItemModel {
+  bool selected=false;
+  final String name;
+  final String img;
+  final String unitImg;
+  final int limit;
+
+  ToppingItemModel(this.name, this.img, this.unitImg, this.limit);
 }

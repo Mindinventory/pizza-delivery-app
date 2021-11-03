@@ -10,7 +10,9 @@ class PizzaChangeState extends PizzaState {
   final bool rightSide;
 }
 
-
+class PizzaToppingChangeState extends PizzaState{
+  PizzaToppingChangeState();
+}
 class PizzaChangedState extends PizzaState {
   PizzaChangedState();
 }

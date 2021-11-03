@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +13,7 @@ import 'package:pizza_delivery/common/app_fonts.dart';
 import 'package:pizza_delivery/common/swipe_detector.dart';
 import 'package:pizza_delivery/constant/colors.dart';
 import 'package:pizza_delivery/cubit/pizza_cubit.dart';
+import 'package:pizza_delivery/ui/custom_painters.dart';
 import 'package:pizza_delivery/ui/pizza_topping.dart';
 import 'package:pizza_delivery/viewmodel/pizza_viewmodel.dart';
 
@@ -25,125 +29,157 @@ class _HomePageState extends State<HomePage>
   final PizzaCubit pizzaCubit = PizzaCubit();
   late final AnimationController animationController;
   int count = 0;
+
   int? pizzaIndex;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+
     animationController =
         AnimationController(vsync: this, duration: const Duration(seconds: 1));
   }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-        child: Column(
-          children: [
-            _buildTopTitle(),
-            _buildPizza(),
-            Container(
-              height: 50.0,
-              width: 180.0,
-              margin: const EdgeInsets.only(top: 20),
-              child: SizedBox(
-                width: 174,
-                child: StatefulBuilder(builder: (context, setStateForSize) {
-                  return Stack(
-                    alignment: Alignment.centerLeft,
-                    children: [
-                      Row(
-                        children: [
-                          SizeButton(
-                            onTap: () {
-                              if (pizzaCubit.pizzaSize != PizzaSize.small) {
-                                final old = pizzaCubit.pizzaSize;
-                                pizzaCubit.pizzaSize = PizzaSize.small;
-                                setStateForSize(() {});
-                                count++;
-                                pizzaCubit.emit(PizzaChangeSizeState(old));
-                              }
-                            },
-                            text: 'S',
-                            isSelected: pizzaCubit.pizzaSize == PizzaSize.small,
-                          ),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          SizeButton(
-                              onTap: () {
-                                if (pizzaCubit.pizzaSize != PizzaSize.medium) {
-                                  final old = pizzaCubit.pizzaSize;
-                                  pizzaCubit.pizzaSize = PizzaSize.medium;
-                                  setStateForSize(() {});
-                                  count++;
-                                  pizzaCubit.emit(PizzaChangeSizeState(old));
-                                }
-                              },
-                              text: 'M',
-                              isSelected:
-                                  pizzaCubit.pizzaSize == PizzaSize.medium),
-                          const SizedBox(
-                            width: 15,
-                          ),
-                          SizeButton(
-                              onTap: () {
-                                if (pizzaCubit.pizzaSize != PizzaSize.large) {
-                                  final old = pizzaCubit.pizzaSize;
-                                  pizzaCubit.pizzaSize = PizzaSize.large;
-                                  setStateForSize(() {});
-                                  count++;
-                                  pizzaCubit.emit(PizzaChangeSizeState(old));
-                                }
-                              },
-                              text: 'L',
-                              isSelected:
-                                  pizzaCubit.pizzaSize == PizzaSize.large),
-                        ],
-                      ),
-                      AnimatedPositioned(
-                          child: CircleAvatar(
-                            radius: 24,
-                            child: Text(
-                              pizzaCubit.pizzaSize == PizzaSize.large
-                                  ? 'L'
-                                  : (pizzaCubit.pizzaSize == PizzaSize.medium
-                                      ? 'M'
-                                      : 'S'),
-                              style: GoogleFonts.playfairDisplay(
-                                  fontSize: 18.0, color: AppColors.brown),
+    return BlocProvider(
+      create: (context) => pizzaCubit,
+      child: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  _buildTopTitle(),
+                  _buildPizza(),
+                  Container(
+                    height: 50.0,
+                    width: 180.0,
+                    margin: const EdgeInsets.only(top: 20),
+                    child: SizedBox(
+                      width: 174,
+                      child:
+                          StatefulBuilder(builder: (context, setStateForSize) {
+                        return Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            Row(
+                              children: [
+                                SizeButton(
+                                  onTap: () {
+                                    if (pizzaCubit.pizzaSize !=
+                                        PizzaSize.small) {
+                                      final old = pizzaCubit.pizzaSize;
+                                      pizzaCubit.pizzaSize = PizzaSize.small;
+                                      setStateForSize(() {});
+                                      count++;
+                                      pizzaCubit
+                                          .emit(PizzaChangeSizeState(old));
+                                    }
+                                  },
+                                  text: 'S',
+                                  isSelected:
+                                      pizzaCubit.pizzaSize == PizzaSize.small,
+                                ),
+                                const SizedBox(
+                                  width: 15,
+                                ),
+                                SizeButton(
+                                    onTap: () {
+                                      if (pizzaCubit.pizzaSize !=
+                                          PizzaSize.medium) {
+                                        final old = pizzaCubit.pizzaSize;
+                                        pizzaCubit.pizzaSize = PizzaSize.medium;
+                                        setStateForSize(() {});
+                                        count++;
+                                        pizzaCubit
+                                            .emit(PizzaChangeSizeState(old));
+                                      }
+                                    },
+                                    text: 'M',
+                                    isSelected: pizzaCubit.pizzaSize ==
+                                        PizzaSize.medium),
+                                const SizedBox(
+                                  width: 15,
+                                ),
+                                SizeButton(
+                                    onTap: () {
+                                      if (pizzaCubit.pizzaSize !=
+                                          PizzaSize.large) {
+                                        final old = pizzaCubit.pizzaSize;
+                                        pizzaCubit.pizzaSize = PizzaSize.large;
+                                        setStateForSize(() {});
+                                        count++;
+                                        pizzaCubit
+                                            .emit(PizzaChangeSizeState(old));
+                                      }
+                                    },
+                                    text: 'L',
+                                    isSelected: pizzaCubit.pizzaSize ==
+                                        PizzaSize.large),
+                              ],
                             ),
-                            backgroundColor: AppColors.orange,
-                          ),
-                          left: pizzaCubit.pizzaSize == PizzaSize.small
-                              ? 0
-                              : (pizzaCubit.pizzaSize == PizzaSize.medium
-                                  ? 63
-                                  : 126),
-                          duration: const Duration(milliseconds: 200)),
-                    ],
-                  );
-                }),
+                            AnimatedPositioned(
+                                child: CircleAvatar(
+                                  radius: 24,
+                                  child: Text(
+                                    pizzaCubit.pizzaSize == PizzaSize.large
+                                        ? 'L'
+                                        : (pizzaCubit.pizzaSize ==
+                                                PizzaSize.medium
+                                            ? 'M'
+                                            : 'S'),
+                                    style: GoogleFonts.playfairDisplay(
+                                        fontSize: 18.0, color: AppColors.brown),
+                                  ),
+                                  backgroundColor: AppColors.orange,
+                                ),
+                                left: pizzaCubit.pizzaSize == PizzaSize.small
+                                    ? 0
+                                    : (pizzaCubit.pizzaSize == PizzaSize.medium
+                                        ? 63
+                                        : 126),
+                                duration: const Duration(milliseconds: 200)),
+                          ],
+                        );
+                      }),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  _toppingsCounter(),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    height: 70,
+                    child: PizzaToppingListView(),
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: 100,
+                    child: Stack(
+                      children: [
+                        CustomPaint(
+                          painter: CurveLinePainter(
+                              MediaQuery.of(context).size.width),
+                        ),
+                        Center(child: _addToCartButton()),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            _toppingsCounter(),
-            const SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              height: 70,
-              child: PizzaToppingListView(),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            _addToCartButton()
-          ],
+           _buildToppingView(),
+            ],
+          ),
         ),
       ),
     );
@@ -368,36 +404,39 @@ class _HomePageState extends State<HomePage>
   }
 
   Widget _buildTopTitle() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          borderRadius: BorderRadius.circular(13),
-          onTap: () {},
-          child: Image.asset(
-            'assets/icons/left-arrow.png',
-            height: 26.0,
-            width: 26.0,
+    return SizedBox(
+      height: 70,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(13),
+            onTap: () {},
+            child: Image.asset(
+              'assets/icons/left-arrow.png',
+              height: 26.0,
+              width: 26.0,
+            ),
           ),
-        ),
-        const SizedBox(
-          width: 15,
-        ),
-        Expanded(child: _buildPizzaNameAndDesc()),
-        const SizedBox(
-          width: 15,
-        ),
-        InkWell(
-          borderRadius: BorderRadius.circular(15),
-          child: Image.asset(
-            'assets/icons/heart.png',
-            height: 25.0,
-            width: 25.0,
+          const SizedBox(
+            width: 15,
           ),
-          onTap: () {},
-        ),
-      ],
+          Expanded(child: _buildPizzaNameAndDesc()),
+          const SizedBox(
+            width: 15,
+          ),
+          InkWell(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.asset(
+              'assets/icons/heart.png',
+              height: 25.0,
+              width: 25.0,
+            ),
+            onTap: () {},
+          ),
+        ],
+      ),
     );
   }
 
@@ -406,6 +445,13 @@ class _HomePageState extends State<HomePage>
 
     return BlocBuilder<PizzaCubit, PizzaState>(
       bloc: pizzaCubit,
+      buildWhen: (prev,current){
+        if (current.runtimeType == PizzaChangeState ||
+            current.runtimeType == PizzaChangedState||current.runtimeType == PizzaChangeSizeState) {
+          return true;
+        }
+        return false;
+      },
       builder: (context, state) {
         final pizzaSize = getPizzaSize(pizzaCubit.pizzaSize);
         final prevPizzaSize = pizzaSize - 50;
@@ -659,6 +705,67 @@ class _HomePageState extends State<HomePage>
           ],
         ),
       ),
+    );
+  }
+
+ Widget _buildToppingView() {
+    return  BlocBuilder<PizzaCubit, PizzaState>(
+      bloc: pizzaCubit,
+      buildWhen: (prev,current){
+        if(current.runtimeType == PizzaToppingChangeState) {
+          return true;
+        }
+        return false;
+      },
+      builder: (context, state) {
+
+        return Stack(
+          children: [
+            for (Topping topping in pizzaCubit.toppings)
+              FutureBuilder<ui.Image>(future: Future(() async {
+                final ByteData data =
+                await rootBundle.load(topping.unitImg);
+                final Completer<ui.Image> completer = Completer();
+                ui.decodeImageFromList(Uint8List.view(data.buffer),
+                        (ui.Image img) {
+                      return completer.complete(img);
+                    });
+                return completer.future;
+              }),
+                  builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return TweenAnimationBuilder(
+                    // key: GlobalKey(),
+                    key: ValueKey(topping),
+                    tween: Tween<double>(begin: 0, end: 1),
+                    builder: (context, double value, child) {
+                      return CustomPaint(
+                        painter: TopperPainter(
+                          deviceWidth: MediaQuery.of(context)
+                              .size
+                              .width
+                              .toInt(),
+                          deviceHeight: MediaQuery.of(context)
+                              .size
+                              .height
+                              .toInt(),
+                          img: snapshot.data!,
+                          value: value,
+                          positions: topping.positions,
+                          pizzaSize:
+                          getPizzaSize(pizzaCubit.pizzaSize),
+                        ),
+                      );
+                    },
+                    duration: const Duration(milliseconds: 900),
+                    curve: Curves.easeInOutCubic,
+                  );
+                }
+                return Container();
+              })
+          ],
+        );
+      },
     );
   }
 }
