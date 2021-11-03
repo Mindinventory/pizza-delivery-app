@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:pizza_delivery/common/app_fonts.dart';
 import 'package:pizza_delivery/common/swipe_detector.dart';
 import 'package:pizza_delivery/constant/colors.dart';
 import 'package:pizza_delivery/cubit/pizza_cubit.dart';
+import 'package:pizza_delivery/ui/pizza_topping.dart';
 import 'package:pizza_delivery/viewmodel/pizza_viewmodel.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,6 +25,7 @@ class _HomePageState extends State<HomePage>
   final PizzaCubit pizzaCubit = PizzaCubit();
   late final AnimationController animationController;
   int count = 0;
+  int? pizzaIndex;
 
   @override
   void initState() {
@@ -125,10 +128,20 @@ class _HomePageState extends State<HomePage>
                 }),
               ),
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             _toppingsCounter(),
-            const SizedBox(height: 10,),
-            const Expanded(child: PizzaToppingListView()),
+            const SizedBox(
+              height: 10,
+            ),
+            SizedBox(
+              height: 70,
+              child: PizzaToppingListView(),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
             _addToCartButton()
           ],
         ),
@@ -262,25 +275,28 @@ class _HomePageState extends State<HomePage>
   Widget _buildPizzaNameAndDesc() {
     return BlocBuilder<PizzaCubit, PizzaState>(
       bloc: pizzaCubit,
-      buildWhen: (prev,current){
-        if(current.runtimeType == PizzaChangeState||current.runtimeType == PizzaChangedState) {
+      buildWhen: (prev, current) {
+        if (current.runtimeType == PizzaChangeState ||
+            current.runtimeType == PizzaChangedState) {
           return true;
         }
         return false;
       },
       builder: (context, state) {
-        final rightSide=state.runtimeType == PizzaChangeState?(state as PizzaChangeState).rightSide:null;
+        final rightSide = state.runtimeType == PizzaChangeState
+            ? (state as PizzaChangeState).rightSide
+            : null;
         return TweenAnimationBuilder(
           key: ValueKey(count),
-          tween: Tween<double>(begin: 0,end: 1),
-          builder: (context, double value,child) {
+          tween: Tween<double>(begin: 0, end: 1),
+          builder: (context, double value, child) {
             return Stack(
               alignment: Alignment.center,
               children: [
                 Transform(
-                  transform: Matrix4.identity() .. rotateX(-(1-value)*pi/2),
+                  transform: Matrix4.identity()..rotateX(-(1 - value) * pi / 2),
                   child: Opacity(
-                    opacity: rightSide!=null?1-value:1,
+                    opacity: rightSide != null ? 1 - value : 1,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -292,46 +308,56 @@ class _HomePageState extends State<HomePage>
                           height: 5,
                         ),
                         Text(
-                          pizzaCubit.pizzaList[pizzaCubit.selectedPizza].description,
+                          pizzaCubit
+                              .pizzaList[pizzaCubit.selectedPizza].description,
                           style: AppFonts.pizzaDescriptionFont,
                         ),
                       ],
                     ),
                   ),
                 ),
-                if(rightSide!=null)
-                Transform(
-                  transform: Matrix4.identity() .. rotateX((1-value)*pi/2),
-                  child: Opacity(
-                    opacity: value,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          pizzaCubit.pizzaList[pizzaCubit.selectedPizza+(rightSide?-1:1)].name,
-                          style: AppFonts.pizzaTitleFont,
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          pizzaCubit.pizzaList[pizzaCubit.selectedPizza+(rightSide?-1:1)].description,
-                          style: AppFonts.pizzaDescriptionFont,
-                        ),
-                      ],
+                if (rightSide != null)
+                  Transform(
+                    transform: Matrix4.identity()
+                      ..rotateX((1 - value) * pi / 2),
+                    child: Opacity(
+                      opacity: value,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            pizzaCubit
+                                .pizzaList[pizzaCubit.selectedPizza +
+                                    (rightSide ? -1 : 1)]
+                                .name,
+                            style: AppFonts.pizzaTitleFont,
+                          ),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                          Text(
+                            pizzaCubit
+                                .pizzaList[pizzaCubit.selectedPizza +
+                                    (rightSide ? -1 : 1)]
+                                .description,
+                            style: AppFonts.pizzaDescriptionFont,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
               ],
             );
-          }, duration: const Duration(milliseconds: 600),
+          },
+          duration: const Duration(milliseconds: 600),
         );
       },
     );
   }
+
   Widget _toppingsCounter() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20.0),
+    return const Padding(
+      padding: EdgeInsets.only(top: 20.0),
       child: Text(
         '0/3',
         style: TextStyle(
@@ -340,6 +366,7 @@ class _HomePageState extends State<HomePage>
       ),
     );
   }
+
   Widget _buildTopTitle() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -387,47 +414,52 @@ class _HomePageState extends State<HomePage>
             : null;
         late final double? oldPizzaSize;
         if (state.runtimeType == PizzaChangeSizeState) {
-          oldPizzaSize = getPizzaSize(pizzaCubit.pizzaSize);
-        }
-        else{
+          oldPizzaSize = getPizzaSize((state as PizzaChangeSizeState).oldSize);
+        } else {
           oldPizzaSize = null;
         }
 
         return SwipeDetector(
-          onSwipe: (rightSwipe) {
-            if (state.runtimeType != PizzaChangeState) {
-              if (rightSwipe) {
-                if (pizzaCubit.selectedPizza > 0) {
-                  count--;
-                  pizzaCubit.emit(PizzaChangeState(rightSide: rightSwipe));
-                }
-              } else {
-                if (pizzaCubit.pizzaList.length - 1 >
-                    pizzaCubit.selectedPizza) {
-                  count++;
-                  pizzaCubit.emit(PizzaChangeState(rightSide: rightSwipe));
-                }
+          onSwipe: (isRightSwipe) {
+            // if (state.runtimeType != PizzaChangeState) {
+            if (pizzaIndex != null && pizzaIndex != pizzaCubit.selectedPizza) {
+              pizzaCubit.emit(PizzaChangedState());
+              pizzaCubit.selectedPizza = pizzaIndex!;
+            }
+            if (isRightSwipe) {
+              if (pizzaCubit.selectedPizza > 0) {
+                count--;
+                pizzaIndex = pizzaCubit.selectedPizza - 1;
+                pizzaCubit.emit(PizzaChangeState(rightSide: isRightSwipe));
+              }
+            } else {
+              if (pizzaCubit.pizzaList.length - 1 > pizzaCubit.selectedPizza) {
+                count++;
+                pizzaIndex = pizzaCubit.selectedPizza + 1;
+                pizzaCubit.emit(PizzaChangeState(rightSide: isRightSwipe));
               }
             }
+            // }
 
             // print('SWIPE ${rightSwipe?'RIGHT':'LEFT'}');
           },
           child: TweenAnimationBuilder(
             key: ValueKey(count),
             tween: Tween<double>(begin: 0, end: 1),
-            duration:
-                rightSwipe != null || state.runtimeType == PizzaChangeSizeState
-                    ? const Duration(milliseconds: 600)
-                    : const Duration(milliseconds: 0),
-            curve: Curves.linearToEaseOut,
+            duration: rightSwipe != null
+                ? const Duration(milliseconds: 800)
+                : (state.runtimeType == PizzaChangeSizeState
+                    ? const Duration(milliseconds: 500)
+                    : const Duration(milliseconds: 0)),
+            curve:
+                rightSwipe != null ? Curves.linearToEaseOut : Curves.decelerate,
             onEnd: () {
               if (rightSwipe != null) {
-                if (rightSwipe) {
-                  pizzaCubit.selectedPizza--;
-                } else {
-                  pizzaCubit.selectedPizza++;
+                if (pizzaCubit.selectedPizza != pizzaIndex) {
+                  pizzaCubit.selectedPizza = pizzaIndex!;
+
+                  pizzaCubit.emit(PizzaChangedState());
                 }
-                pizzaCubit.emit(PizzaChangedState());
               }
             },
             builder: (context, double value, child) {
@@ -437,8 +469,17 @@ class _HomePageState extends State<HomePage>
                           ((value + 0.7) * (pizzaSize - prevPizzaSize)))
                       : prevPizzaSize
                   : pizzaSize;
-              final size2=(oldPizzaSize!=null?(oldPizzaSize + value*(pizzaSize-oldPizzaSize)):pizzaChangedSize);
-              final plateSize=(oldPizzaSize!=null?(oldPizzaSize +30+ value*(pizzaSize-oldPizzaSize)):(pizzaSize+30));
+              final size2 = (oldPizzaSize != null
+                  ? (oldPizzaSize +
+                      (value < 0.4
+                              ? 0
+                              : (value - 0.4) *
+                                  (pizzaSize / (pizzaSize * 0.6))) *
+                          (pizzaSize - oldPizzaSize))
+                  : pizzaChangedSize);
+              final plateSize = (oldPizzaSize != null
+                  ? (oldPizzaSize + 30 + value * (pizzaSize - oldPizzaSize))
+                  : (pizzaSize + 30));
               return Column(
                 children: [
                   SizedBox(
@@ -473,7 +514,9 @@ class _HomePageState extends State<HomePage>
                                   0)
                               : const Offset(0, 0),
                           child: Transform.rotate(
-                            angle: pi * ((value - 0.2) > 0 ? value - 0.2 : 0),
+                            angle: rightSwipe != null
+                                ? pi * ((value - 0.4) > 0 ? value - 0.4 : 0)
+                                : 0.6 * pi,
                             child: Image.asset(
                               pizzaCubit
                                   .pizzaList[pizzaCubit.selectedPizza].imgPath,
@@ -492,7 +535,7 @@ class _HomePageState extends State<HomePage>
                                         : (deviceWidth / 2) + (pizzaSize / 2)),
                                 0),
                             child: Transform.rotate(
-                              angle: pi * ((value - 0.4) > 0 ? value - 0.2 : 0),
+                              angle: pi * ((value - 0.4) > 0 ? value - 0.4 : 0),
                               child: Image.asset(
                                 pizzaCubit
                                     .pizzaList[pizzaCubit.selectedPizza +
@@ -556,7 +599,7 @@ class _HomePageState extends State<HomePage>
       case PizzaSize.small:
         return 200;
       case PizzaSize.large:
-        return 260;
+        return 280;
     }
   }
 
@@ -576,8 +619,6 @@ class _HomePageState extends State<HomePage>
       style: AppFonts.pizzaPriceFont,
     );
   }
-
-
 
   Widget _addToCartButton() {
     return Padding(
@@ -610,7 +651,10 @@ class _HomePageState extends State<HomePage>
             const SizedBox(width: 20.0),
             Text(
               'Add To Cart',
-              style: GoogleFonts.poppins(color: Colors.white, fontSize: 16.0,fontWeight: FontWeight.w500),
+              style: GoogleFonts.poppins(
+                  color: Colors.white,
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w500),
             )
           ],
         ),
@@ -652,30 +696,4 @@ class SizeButton extends StatelessWidget {
       ),
     );
   }
-}
-class PizzaToppingListView extends StatelessWidget{
-  static const  List<String> listItem = [
-    'assets/images/toppings/green_chillies_thumb.png',
-    'assets/images/toppings/green_peppers_thumb.png',
-    'assets/images/toppings/halloumi_thumb.png',
-    'assets/images/toppings/mushrooms_thumb.png',
-    'assets/images/toppings/olives_thumb.png',
-    'assets/images/toppings/onions_thumb.png',
-    'assets/images/toppings/pineapples_thumb.png',
-    'assets/images/toppings/sweetcorn_thumb.png',
-    'assets/images/toppings/tomatos_thumb.png',
-  ];
-
-  const PizzaToppingListView({Key? key}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return RotatedBox(
-      quarterTurns: -1,
-      child: ListWheelScrollView(
-          itemExtent: 100,
-          offAxisFraction: -1.2,
-          children: listItem.map((e) => Image.asset(e,width: 50,height: 50,fit: BoxFit.fill,)).toList()),
-    );
-  }
-
 }
