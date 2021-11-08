@@ -11,7 +11,9 @@ class PizzaChangeState extends PizzaState {
 }
 
 class PizzaToppingChangeState extends PizzaState{
-  PizzaToppingChangeState();
+  PizzaToppingChangeState(this.topping, this.added);
+  final ToppingItemModel topping;
+  final bool added;
 }
 class PizzaChangedState extends PizzaState {
   PizzaChangedState();

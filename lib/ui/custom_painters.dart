@@ -28,8 +28,8 @@ class CurveLinePainter extends CustomPainter {
 
 class Pos {
   final int x, y;
-
-  Pos(this.x, this.y);
+  double velocity;
+  Pos(this.x, this.y,this.velocity);
 }
 
 class TopperPainter extends CustomPainter {
@@ -42,25 +42,32 @@ class TopperPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) async {
+
     final pizzaRadius = pizzaSize / 2;
     final centerX = deviceWidth / 2;
     const centerY = 70 + (350 / 2);
     for (int j = 0; j < positions.length; j++) {
+      final double value=this.value*this.value*positions[j].velocity<1?this.value*this.value*positions[j].velocity:1;
       final double startX =
-          (deviceWidth * (positions[j].x - centerX) / pizzaRadius) + centerX;
+          (deviceWidth  * (positions[j].x - centerX) / pizzaRadius) + centerX;
       final double startY =
           (deviceHeight * (positions[j].y - centerY) / pizzaRadius) + centerY;
+      if(value<1){
+        painter.imageFilter=ui.ImageFilter.blur(sigmaX: (1-value)*7,sigmaY: (1-value)*7);
+      }
       final double x2 = (startX - (value) * (startX - positions[j].x));
       final double y2 = (startY - (value) * (startY - positions[j].y));
       // canvas.drawShadow(Path() .. addRect(Rect.fromLTRB(x2, y2, x2+(1.2-value)*70,y2+(1.2-value)*70)), Colors.grey.shade100.withOpacity(0.2), 5, true);
       // canvas.drawCircle(Offset(x2,y2), 2, painter);
+      canvas.rotate(j*pi/3);
       canvas.drawImageRect(
           img,
           Rect.fromLTRB(0, 0, img.width.toDouble(), img.height.toDouble()),
-          Rect.fromLTRB(x2, y2, x2 + (1.2 - value) * img.width,
+          Rect.fromLTRB(x2, y2, x2+ (1.2 - value) * img.width,
               y2 + (1.2 - value) * img.height),
           painter);
     }
+    canvas.rotate(0);
   }
 
   TopperPainter({

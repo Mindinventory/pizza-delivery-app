@@ -53,36 +53,23 @@ class PizzaCubit extends Cubit<PizzaState> {
     // 'assets/images/toppings/pineapples_thumb.png',
     // 'assets/images/toppings/sweetcorn_thumb.png',
     // 'assets/images/toppings/tomatos_thumb.png',
+
+    // ToppingItemModel('name', 'assets/images/toppings/green_chillies_thumb.png',
+    //     'assets/images/toppings/unit/green_chillies_thumb.png', 100),
     ToppingItemModel(
-        'name',
-        'assets/images/toppings/green_chillies_thumb.png',
-        'assets/images/toppings/unit/green_chillies_thumb.png',
-        100),
-    ToppingItemModel(
-        'name',
-        'assets/images/toppings/onions_thumb.png',
-        'assets/images/toppings/unit/onions_thumb_unit.png',
-        10,),
-    ToppingItemModel(
-        'name',
-        'assets/images/toppings/pineapples_thumb.png',
-        'assets/images/toppings/unit/pineapples_thumb_unit.png',
-        30),
-    ToppingItemModel(
-        'name',
-        'assets/images/toppings/halloumi_thumb.png',
-        'assets/images/toppings/unit/halloumi_thumb_unit.png',
-        30),
-    ToppingItemModel(
-        'name',
-        'assets/images/toppings/mushrooms_thumb.png',
-        'assets/images/toppings/unit/mushrooms_thumb.png',
-        30),
-    ToppingItemModel(
-        'name',
-        'assets/images/toppings/sweetcorn_thumb.png',
-        'assets/images/toppings/unit/sweetcorn_thumb_unit.png',
-        30),
+      'name',
+      'assets/images/toppings/onions_thumb.png',
+      'assets/images/toppings/unit/onions_thumb_unit.png',
+      90,4
+    ),
+    ToppingItemModel('name', 'assets/images/toppings/pineapples_thumb.png',
+        'assets/images/toppings/unit/pineapples_thumb_unit.png', 100,2),
+    ToppingItemModel('name', 'assets/images/toppings/halloumi_thumb.png',
+        'assets/images/toppings/unit/halloumi_thumb_unit.png', 80,0.7),
+    // ToppingItemModel('name', 'assets/images/toppings/mushrooms_thumb.png',
+    //     'assets/images/toppings/unit/mushrooms_thumb.png', 30),
+    ToppingItemModel('name', 'assets/images/toppings/sweetcorn_thumb.png',
+        'assets/images/toppings/unit/sweetcorn_thumb_unit.png', 90,0.5),
   ];
   PizzaSize pizzaSize = PizzaSize.medium;
   int selectedPizza = 1;
@@ -104,26 +91,47 @@ class PizzaCubit extends Cubit<PizzaState> {
     final random = Random.secure();
     final deviceWidth = MediaQuery.of(context).size.width;
     final calculatedPizzaSize = getPizzaSize(pizzaSize);
-    const centerY = 70 + (350 / 2);
+    const centerY = 70 + (350 / 2) - 5;
+    final startingXofPizza = (deviceWidth / 2) - (calculatedPizzaSize / 2);
+    final startingYOfPizza = 70 + ((350 - calculatedPizzaSize) / 2);
     final rSquare = (calculatedPizzaSize - 50) * (calculatedPizzaSize - 50) / 4;
-    toppings.add(Topping(
+    toppings.add(
+      Topping(
         toppingItemModel.name,
         toppingItemModel.img,
         toppingItemModel.unitImg,
         List.generate(toppingItemModel.limit, (index) {
           late int x, y;
           do {
-            x = random.nextInt(deviceWidth.toInt());
-            y = random.nextInt(deviceWidth.toInt()+70);
+            x = (startingXofPizza + (calculatedPizzaSize.toInt()*random.nextInt(5000)/5000.0))
+                .toInt();
+            y = (startingYOfPizza +(calculatedPizzaSize.toInt()*random.nextInt(5000)/5000.0))
+                .toInt();
           } while (
-              pow((deviceWidth / 2) - x, 2) + pow(centerY - y, 2) > rSquare);
-          return Pos(x, y);
-        })));
-    emit(PizzaToppingChangeState());
+              pow(((deviceWidth-50)/ 2) - x, 2) + pow(centerY - y, 2) > rSquare);
+          return Pos(x, y, (100 + random.nextInt(100)) / 100.0);
+        }),
+      ),
+    );
+    emit(PizzaToppingChangeState(toppingItemModel,true));
   }
 
-  void removeTopping( ToppingItemModel toppingItemModel){
-    toppings.removeWhere((element) => element.img==toppingItemModel.img);
-    emit(PizzaToppingChangeState());
+  void removeTopping(ToppingItemModel toppingItemModel) {
+    toppings.removeWhere((element) => element.img == toppingItemModel.img);
+    emit(PizzaToppingChangeState(toppingItemModel,false));
+  }
+void changePizzaState(bool isRightSwipe){
+    if(toppings.isNotEmpty){
+      toppings.clear();
+      toppingList.forEach((element) => element.selected=false);
+    }
+    emit(PizzaChangeState(rightSide: isRightSwipe));
+}
+  void changePizzaSize(PizzaSize old){
+    if(toppings.isNotEmpty){
+      toppings.clear();
+      toppingList.forEach((element) => element.selected=false);
+    }
+    emit(PizzaChangeSizeState(old));
   }
 }

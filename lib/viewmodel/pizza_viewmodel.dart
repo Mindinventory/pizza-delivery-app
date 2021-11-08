@@ -34,7 +34,8 @@ class ToppingItemModel {
   final String name;
   final String img;
   final String unitImg;
+  final double price;
   final int limit;
 
-  ToppingItemModel(this.name, this.img, this.unitImg, this.limit);
+  ToppingItemModel(this.name, this.img, this.unitImg, this.limit, this.price);
 }
