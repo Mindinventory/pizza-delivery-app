@@ -737,7 +737,7 @@ class _HomePageState extends State<HomePage>
                             ),
                           );
                         },
-                        duration: const Duration(milliseconds: 700),
+                        duration: const Duration(milliseconds: 600),
                         curve: Curves.decelerate,
                       );
                     }

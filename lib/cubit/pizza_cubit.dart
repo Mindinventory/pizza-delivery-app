@@ -130,7 +130,7 @@ class PizzaCubit extends Cubit<PizzaState> {
                 .toInt();
           } while (pow(((deviceWidth - 50) / 2) - x, 2) + pow(centerY - y, 2) >
               rSquare);
-          return Pos(x, y, (100 + random.nextInt(50)) / 100.0);
+          return Pos(x, y, (100 + (random.nextInt(5000)/100)) / 100.0);
         }),
       ),
     );

@@ -44,7 +44,7 @@ class TopperPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) async {
     final pizzaRadius = pizzaSize / 2;
-    final centerX = (deviceWidth - 20) / 2;
+    final centerX = (deviceWidth - 10) / 2;
     const centerY = 70 + (350 / 2);
     final valueSquare = value * value;
     for (int j = 0; j < positions.length; j++) {
@@ -67,16 +67,18 @@ class TopperPainter extends CustomPainter {
       // canvas.drawShadow(Path() .. addRect(Rect.fromLTRB(x2, y2, x2+(1.2-value)*70,y2+(1.2-value)*70)), Colors.grey.shade100.withOpacity(0.2), 5, true);
       // canvas.drawCircle(Offset(x2,y2), 2, painter);
       // canvas.rotate(j*pi/3);
+      final inter=interpolate(1.2, 0.2, value);
       canvas.drawImageRect(
           img,
           Rect.fromLTRB(0, 0, img.width.toDouble(), img.height.toDouble()),
-          Rect.fromLTRB(x2, y2, x2 + (1.2 - value) * img.width,
-              y2 + (1.2 - value) * img.height),
+          Rect.fromLTRB(x2, y2, x2 + img.width* inter,
+              y2 + img.height*inter),
           painter);
-      // canvas.translate(x2, y2);
-      // canvas.rotate(j*pi/6);
-      // canvas.translate(-x2, y2);
-    }
+      // canvas.drawAtlas(img, [
+      //   RSTransform.fromComponents(rotation: j*30, scale: 0, anchorX: 0, anchorY: 0, translateX: 0, translateY: 0)
+      // ], [Rect.fromLTRB(x2, y2, x2 + img.width* inter,
+      //       y2 + img.height*inter)], [],null, null, paint)
+       }
   }
 
   TopperPainter({
