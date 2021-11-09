@@ -1,12 +1,11 @@
 
 import 'dart:math';
 
-import 'package:carousel_slider/carousel_options.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pizza_delivery/cubit/pizza_cubit.dart';
+import 'package:pizza_delivery/ui/curve_carousel/curve_carousel.dart';
 
 class PizzaToppingListView extends StatelessWidget {
   // static const List<String> listItem = [
@@ -30,13 +29,13 @@ class PizzaToppingListView extends StatelessWidget {
     final listItem=BlocProvider.of<PizzaCubit>(context,listen: false).toppingList;
     return FractionallySizedBox(
       widthFactor: 1
-      ,child: CarouselSlider.builder(
+      ,child: CurvedCarousel(
         // pageSnapping: true,
         // scrollBehavior: const CupertinoScrollBehavior(),
         // clipBehavior: Clip.none,
         // controller: pageController,
 
-        itemBuilder: (context, i,i1) {
+        itemBuilder: (context, i) {
           return ToppingItem(img: listItem[i].img, selectionChange: (bool){
             listItem[i].selected=bool;
             if(bool){
@@ -49,15 +48,16 @@ class PizzaToppingListView extends StatelessWidget {
         },
         itemCount: listItem.length,
 
-        options: CarouselOptions(
-          height: 100,
-          enlargeStrategy: CenterPageEnlargeStrategy.scale,
-        enlargeCenterPage: true,
-        viewportFraction: 0.25,
-        pageSnapping: false,
-        aspectRatio: MediaQuery.of(context).size.width/300,
-
-      ),),
+      //   options: CarouselOptions(
+      //     height: 100,
+      //     enlargeStrategy: CenterPageEnlargeStrategy.scale,
+      //   enlargeCenterPage: true,
+      //   viewportFraction: 0.25,
+      //   pageSnapping: false,
+      //   aspectRatio: MediaQuery.of(context).size.width/300,
+      //
+      // ),
+    ),
     );
   }
 }
@@ -86,13 +86,15 @@ class _ToppingItemState extends State<ToppingItem> {
           });
           widget.selectionChange.call(selected!);
         },
-        child: Opacity(
-          opacity: selected?? widget.selected?0.3:1,
-          child: Image.asset(
-            widget.img,
-            width: 50,
-            height: 50,
-            fit: BoxFit.fill,
+        child: Center(
+          child: Opacity(
+            opacity: selected?? widget.selected?0.3:1,
+            child: Image.asset(
+              widget.img,
+              width: 50,
+              height: 50,
+              fit: BoxFit.fill,
+            ),
           ),
         ),
       ),

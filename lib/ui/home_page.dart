@@ -7,7 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pizza_delivery/common/app_fonts.dart';
 import 'package:pizza_delivery/common/swipe_detector.dart';
@@ -17,7 +16,6 @@ import 'package:pizza_delivery/cubit/pizza_cubit.dart';
 import 'package:pizza_delivery/ui/custom_painters.dart';
 import 'package:pizza_delivery/ui/pizza_topping.dart';
 import 'package:pizza_delivery/viewmodel/pizza_viewmodel.dart';
-import 'package:simple_gesture_detector/simple_gesture_detector.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -146,30 +144,27 @@ class _HomePageState extends State<HomePage>
                     ),
                   ),
                   const Spacer(),
-                  SizedBox(
-                    height: 100,
-                    child: BlocConsumer<PizzaCubit, PizzaState>(
-                      listener: (context, state) {
-                        // TODO: implement listener
-                      },
-                      builder: (context, state) {
-                        return Column(
-                          children: [
-                            SizedBox(
-                              height: 20,
-                              child: _toppingsCounter(),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            SizedBox(
-                              height: 70,
-                              child: PizzaToppingListView(),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
+                  BlocConsumer<PizzaCubit, PizzaState>(
+                    listener: (context, state) {
+                      // TODO: implement listener
+                    },
+                    builder: (context, state) {
+                      return Column(
+                        children: [
+                          SizedBox(
+                            height: 20,
+                            child: _toppingsCounter(),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          SizedBox(
+                            height: 70,
+                            child: PizzaToppingListView(),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const Spacer(),
                   SizedBox(
