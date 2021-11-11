@@ -30,11 +30,6 @@ class PizzaToppingListView extends StatelessWidget {
     return FractionallySizedBox(
       widthFactor: 1
       ,child: CurvedCarousel(
-        // pageSnapping: true,
-        // scrollBehavior: const CupertinoScrollBehavior(),
-        // clipBehavior: Clip.none,
-        // controller: pageController,
-
         itemBuilder: (context, i) {
           return ToppingItem(img: listItem[i].img, selectionChange: (bool){
             listItem[i].selected=bool;
@@ -47,16 +42,6 @@ class PizzaToppingListView extends StatelessWidget {
           }, selected: listItem[i].selected,key: ValueKey(listItem[i].selected),);
         },
         itemCount: listItem.length,
-
-      //   options: CarouselOptions(
-      //     height: 100,
-      //     enlargeStrategy: CenterPageEnlargeStrategy.scale,
-      //   enlargeCenterPage: true,
-      //   viewportFraction: 0.25,
-      //   pageSnapping: false,
-      //   aspectRatio: MediaQuery.of(context).size.width/300,
-      //
-      // ),
     ),
     );
   }
@@ -91,8 +76,8 @@ class _ToppingItemState extends State<ToppingItem> {
             opacity: selected?? widget.selected?0.3:1,
             child: Image.asset(
               widget.img,
-              width: 50,
-              height: 50,
+              width: 60,
+              height: 60,
               fit: BoxFit.fill,
             ),
           ),

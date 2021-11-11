@@ -23,26 +23,26 @@ class PizzaCubit extends Cubit<PizzaState> {
         description: 'This pizza is very delicious',
         imgPath: 'assets/images/pizza2.png',
         price: 7.00),
-    PizzaViewModel(
-        name: 'Pizza 3',
-        description: 'This pizza is very amazing',
-        imgPath: 'assets/images/pizza3.png',
-        price: 15.0),
-    PizzaViewModel(
-        name: 'Pizza 4',
-        description: 'This pizza is very delicious',
-        imgPath: 'assets/images/pizza4.png',
-        price: 5.00),
-    PizzaViewModel(
-        name: 'Pizza 5',
-        description: 'This pizza is very delicious',
-        imgPath: 'assets/images/pizza5.png',
-        price: 20.00),
-    PizzaViewModel(
-        name: 'Pizza 6',
-        description: 'This pizza is very delicious',
-        imgPath: 'assets/images/pizza6.png',
-        price: 13.00),
+    // PizzaViewModel(
+    //     name: 'Pizza 3',
+    //     description: 'This pizza is very amazing',
+    //     imgPath: 'assets/images/pizza3.png',
+    //     price: 15.0),
+    // PizzaViewModel(
+    //     name: 'Pizza 4',
+    //     description: 'This pizza is very delicious',
+    //     imgPath: 'assets/images/pizza4.png',
+    //     price: 5.00),
+    // PizzaViewModel(
+    //     name: 'Pizza 5',
+    //     description: 'This pizza is very delicious',
+    //     imgPath: 'assets/images/pizza5.png',
+    //     price: 20.00),
+    // PizzaViewModel(
+    //     name: 'Pizza 6',
+    //     description: 'This pizza is very delicious',
+    //     imgPath: 'assets/images/pizza6.png',
+    //     price: 13.00),
   ];
   final List<ToppingItemModel> toppingList = [
     // 'assets/images/toppings/green_peppers_thumb.png',
@@ -60,7 +60,7 @@ class PizzaCubit extends Cubit<PizzaState> {
     ToppingItemModel('name', 'assets/images/toppings/onions_thumb.png',
         'assets/images/toppings/unit/onions_thumb_unit.png', 90, 4),
     ToppingItemModel('name', 'assets/images/toppings/pineapples_thumb.png',
-        'assets/images/toppings/unit/pineapples_thumb_unit.png', 100, 2),
+        'assets/images/toppings/unit/pineapples_thumb_unit.png', 200, 2),
     ToppingItemModel('name', 'assets/images/toppings/halloumi_thumb.png',
         'assets/images/toppings/unit/halloumi_thumb_unit.png', 80, 0.7),
 
@@ -71,23 +71,53 @@ class PizzaCubit extends Cubit<PizzaState> {
         'assets/images/toppings/unit/sweetcorn_thumb_unit.png', 90, 0.5),
 
     //duplicate
-
-    /* ToppingItemModel('name', 'assets/images/toppings/pineapples_thumb.png',
-        'assets/images/toppings/unit/pineapples_thumb_unit.png', 100,2),
-    ToppingItemModel('name', 'assets/images/toppings/halloumi_thumb.png',
-        'assets/images/toppings/unit/halloumi_thumb_unit.png', 80,0.7),
-
-
-    ToppingItemModel('name', 'assets/images/toppings/mushrooms_thumb.png',
-        'assets/images/toppings/unit/mushrooms_thumb.png', 30,2),
-
-
-
-    ToppingItemModel('name', 'assets/images/toppings/sweetcorn_thumb.png',
-        'assets/images/toppings/unit/sweetcorn_thumb_unit.png', 90,0.5),*/
+    //
+    //  ToppingItemModel('name', 'assets/images/toppings/pineapples_thumb.png',
+    //     'assets/images/toppings/unit/pineapples_thumb_unit.png', 100,2),
+    // ToppingItemModel('name', 'assets/images/toppings/halloumi_thumb.png',
+    //     'assets/images/toppings/unit/halloumi_thumb_unit.png', 80,0.7),
+    //
+    //
+    // ToppingItemModel('name', 'assets/images/toppings/mushrooms_thumb.png',
+    //     'assets/images/toppings/unit/mushrooms_thumb.png', 30,2),
+    //
+    //
+    //
+    // ToppingItemModel('name', 'assets/images/toppings/sweetcorn_thumb.png',
+    //     'assets/images/toppings/unit/sweetcorn_thumb_unit.png', 90,0.5),
+    //
+    //
+    // ToppingItemModel('name', 'assets/images/toppings/pineapples_thumb.png',
+    //     'assets/images/toppings/unit/pineapples_thumb_unit.png', 100,2),
+    // ToppingItemModel('name', 'assets/images/toppings/halloumi_thumb.png',
+    //     'assets/images/toppings/unit/halloumi_thumb_unit.png', 80,0.7),
+    //
+    //
+    // ToppingItemModel('name', 'assets/images/toppings/mushrooms_thumb.png',
+    //     'assets/images/toppings/unit/mushrooms_thumb.png', 30,2),
+    //
+    //
+    //
+    // ToppingItemModel('name', 'assets/images/toppings/sweetcorn_thumb.png',
+    //     'assets/images/toppings/unit/sweetcorn_thumb_unit.png', 90,0.5),
+    //
+    //
+    // ToppingItemModel('name', 'assets/images/toppings/pineapples_thumb.png',
+    //     'assets/images/toppings/unit/pineapples_thumb_unit.png', 100,2),
+    // ToppingItemModel('name', 'assets/images/toppings/halloumi_thumb.png',
+    //     'assets/images/toppings/unit/halloumi_thumb_unit.png', 80,0.7),
+    //
+    //
+    // ToppingItemModel('name', 'assets/images/toppings/mushrooms_thumb.png',
+    //     'assets/images/toppings/unit/mushrooms_thumb.png', 30,2),
+    //
+    //
+    //
+    // ToppingItemModel('name', 'assets/images/toppings/sweetcorn_thumb.png',
+    //     'assets/images/toppings/unit/sweetcorn_thumb_unit.png', 90,0.5),
   ];
   PizzaSize pizzaSize = PizzaSize.medium;
-  int selectedPizza = 1;
+  int selectedPizza = 0;
 
   PizzaCubit() : super(PizzaInitial());
 
@@ -109,7 +139,7 @@ class PizzaCubit extends Cubit<PizzaState> {
     const centerY = 70 + (350 / 2) - 5;
     final startingXofPizza = (deviceWidth / 2) - (calculatedPizzaSize / 2);
     final startingYOfPizza = 70 + ((350 - calculatedPizzaSize) / 2);
-    final rSquare = (calculatedPizzaSize - 50) * (calculatedPizzaSize - 50) / 4;
+    final rSquare = (calculatedPizzaSize - 40) * (calculatedPizzaSize - 40) / 4;
     toppings.add(
       Topping(
         toppingItemModel.name,
@@ -128,7 +158,7 @@ class PizzaCubit extends Cubit<PizzaState> {
                         random.nextInt(5000) /
                         5000.0))
                 .toInt();
-          } while (pow(((deviceWidth - 50) / 2) - x, 2) + pow(centerY - y, 2) >
+          } while (pow(((deviceWidth - 25) / 2) - x, 2) + pow(centerY - y, 2) >
               rSquare);
           return Pos(x, y, (100 + (random.nextInt(5000)/100)) / 100.0);
         }),

@@ -17,7 +17,7 @@ class CurveLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     canvas.drawArc(
-        Rect.fromLTRB(-20, -20, deviceWidth, 30), pi, -pi, false, painter);
+        Rect.fromLTRB(-30, -60, deviceWidth, 30), pi, -pi, false, painter);
   }
 
   @override

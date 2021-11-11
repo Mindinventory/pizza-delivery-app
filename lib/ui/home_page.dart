@@ -28,7 +28,7 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   final PizzaCubit pizzaCubit = PizzaCubit();
   late final AnimationController animationController;
-  int count = 0;
+  int count = -1, saladCount=0;
 
   int? pizzaIndex;
 
@@ -425,7 +425,9 @@ class _HomePageState extends State<HomePage>
                   (value > 0.6 ? value * value : value) *
                       (pizzaSize - oldPizzaSize))
                   : (pizzaSize + 30));
-              final saladCurrentAngle = (pizzaCubit.selectedPizza * pi / 6);
+              final double? saladCurrentAngle =(rightSwipe!=null)? ((rightSwipe?(saladCount+1):(saladCount-1))* pi / 6):null;
+              late final double? saladNewAngle=saladCount * pi / 6;
+
               return Column(
                 children: [
                   SizedBox(
@@ -434,11 +436,11 @@ class _HomePageState extends State<HomePage>
                       alignment: Alignment.center,
                       children: [
                         Transform.rotate(
-                          angle: rightSwipe != null
+                          angle: saladCurrentAngle != null
                               ? (saladCurrentAngle +
-                              ((pizzaIndex! * pi / 6) - saladCurrentAngle) *
-                                  (2 * value * value - value))
-                              : saladCurrentAngle,
+                              (saladNewAngle! - saladCurrentAngle) *
+                                  (value*value))
+                              : saladNewAngle!,
                           child: Image.asset(
                             'assets/images/circle_salad.png',
                             width: plateSize + 50,
@@ -452,10 +454,9 @@ class _HomePageState extends State<HomePage>
                               : 0,
                           //((2*value*value*value)+((1-value)*(1-value))-value)*pi/3
                           child: PhysicalModel(
-                            shadowColor: Colors.grey,
                             shape: BoxShape.rectangle,
                             borderRadius: BorderRadius.circular(plateSize / 2),
-                            color: Colors.brown.shade800,
+                            color: Colors.transparent,//Colors.brown.shade800,
                             elevation: 10,
                             child: Image.asset(
                               'assets/images/wooden_plate.png',
@@ -538,23 +539,30 @@ class _HomePageState extends State<HomePage>
     }
     if (isRightSwipe) {
       if (pizzaCubit.selectedPizza > 0) {
-        count--;
+
         pizzaIndex = pizzaCubit.selectedPizza - 1;
       }
       else {
-        count = pizzaCubit.pizzaList.length - 1;
+
         pizzaIndex = pizzaCubit.pizzaList.length - 1;
+      }
+      count=pizzaIndex!;
+      saladCount=saladCount-1;
+      if(saladCount<0){
+        saladCount=11;
       }
       pizzaCubit.changePizzaState(isRightSwipe);
     } else {
       if (pizzaCubit.pizzaList.length - 1 > pizzaCubit.selectedPizza) {
-        count++;
+
         pizzaIndex = pizzaCubit.selectedPizza + 1;
       }
       else {
-        count = 0;
         pizzaIndex = 0;
       }
+      count=pizzaIndex!;
+
+      saladCount=(saladCount+1)%12;
       pizzaCubit.changePizzaState(isRightSwipe);
     }
   }
@@ -712,7 +720,6 @@ class _HomePageState extends State<HomePage>
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return TweenAnimationBuilder(
-                        // key: GlobalKey(),
                         key: ValueKey(topping.img),
                         tween: Tween<double>(begin: 0, end: 1),
                         builder: (context, double value, child) {

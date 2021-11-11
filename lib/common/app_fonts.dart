@@ -16,5 +16,10 @@ class AppFonts {
     fontSize: 14.0,
   );
 
-  static get pizzaPriceFont => const TextStyle(fontSize: 30.0,fontFamily: 'georgia',fontWeight: FontWeight.w500);
+  static get pizzaPriceFont => const  TextStyle(
+    color: Colors.black,
+    fontWeight: FontWeight.w500,
+    fontFamily: 'georgia',
+    fontSize: 28.0,
+  );
 }

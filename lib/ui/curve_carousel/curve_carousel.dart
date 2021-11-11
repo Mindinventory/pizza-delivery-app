@@ -8,10 +8,11 @@ class CurvedCarousel extends StatefulWidget {
       {Key? key,
       required this.itemBuilder,
       required this.itemCount,
-      this.viewPortSize = 0.15, this.curveScale=8, this.scaleMiddleItem=true, this.middleItemScaleRatio=1.2})
+      this.viewPortSize = 0.20, this.curveScale=8, this.scaleMiddleItem=true, this.middleItemScaleRatio=1.2, this.disableInfiniteScrolling=false})
       : super(key: key);
   final Widget Function(BuildContext, int) itemBuilder;
   final int itemCount;
+  final bool disableInfiniteScrolling;
   final bool scaleMiddleItem;
   final double viewPortSize;
   final double curveScale;
@@ -26,39 +27,60 @@ class _CurvedCarouselState extends State<CurvedCarousel>
   late int currentSelected;
   late AnimationController controller;
   late int viewPortCount;
+  bool? forward;
   int viewPortIndex = 0;
   int lastViewPortIndex = -1;
-
+  late double eachWidth;
+  late int count;
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
-
-  @override
-  Widget build(BuildContext context) {
-    final count = 1 ~/ widget.viewPortSize;
-
-    final eachWidth = (MediaQuery.of(context).size.width / count);
+@override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+     count= 1 ~/ widget.viewPortSize;
+    eachWidth = (MediaQuery.of(context).size.width / count);
     viewPortCount = MediaQuery.of(context).size.width ~/ eachWidth;
     if (viewPortCount % 2 == 0) {
-      viewPortCount--;
+     if(eachWidth*(viewPortCount+0.5)<= MediaQuery.of(context).size.width)
+       {
+         viewPortCount++;
+       }
+     else{
+       viewPortCount--;
+     }
     }
     currentSelected = (viewPortCount - 1) ~/ 2;
-    final itemWidth = MediaQuery.of(context).size.width / viewPortCount;
+  }
+  @override
+  Widget build(BuildContext context) {
+
     return SwipeDetector(
+      threshold: 10,
       onSwipe: (bool) {
         if (!bool) {
-          if (viewPortIndex + viewPortCount < widget.itemCount) {
+          if (viewPortIndex + viewPortCount < widget.itemCount||!widget.disableInfiniteScrolling) {
             lastViewPortIndex = viewPortIndex;
-            viewPortIndex = viewPortIndex + 1;
+            viewPortIndex = (viewPortIndex + 1)%widget.itemCount;
             setState(() {});
+            forward=true;
           }
+            //
+            // else{
+          //   lastViewPortIndex = viewPortIndex;
+          //   viewPortIndex = viewPortIndex + 1;
+          //   setState(() {});
+          // }
         } else {
-          if (viewPortIndex > 0) {
+          if (viewPortIndex > 0||!widget.disableInfiniteScrolling) {
             lastViewPortIndex = viewPortIndex;
             viewPortIndex = viewPortIndex - 1;
+            if(viewPortIndex<0){
+              viewPortIndex=widget.itemCount-1;
+            }
             setState(() {});
+            forward=false;
           }
         }
       },
@@ -66,62 +88,54 @@ class _CurvedCarouselState extends State<CurvedCarousel>
         widthFactor: 1,
         child: TweenAnimationBuilder(
             key: ValueKey(viewPortIndex),
+            curve: Curves.easeInOut,
             tween: Tween<double>(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 400),
+            duration: const Duration(milliseconds: 300),
             builder: (context, double value, child) {
               return Stack(
-                alignment: Alignment.centerLeft,
+                alignment: Alignment.bottomCenter,
                 children: [
-                  for (int i = viewPortIndex;
-                      i < viewPortIndex + viewPortCount;
+                  for (int i=0;
+                      i < viewPortCount;
                       i++)
-                    Positioned(
-                      left: 0,
-                      child: Transform.translate(
-                        offset: Offset(
-                          getCurveX(i - viewPortIndex, itemWidth, value),
-                          getCurveY(i - viewPortIndex, itemWidth, value),
-                        ),
-                        child: Transform.rotate(
-                          angle: getAngle(i - viewPortIndex, itemWidth, value),
-                          child: Transform.scale(
-                            scale: getItemScale(i - viewPortIndex, value),
-                            child: widget.itemBuilder(context, i),
-                          ),
+                    Transform.translate(
+                      offset: Offset(
+                        getCurveX(i, eachWidth, value),
+                        getCurveY(i, eachWidth, value),
+                      ),
+                      child: Transform.rotate(
+                        angle: getAngle(i, eachWidth, value),
+                        child: Transform.scale(
+                          scale: getItemScale(i , value),
+                          child: widget.itemBuilder(context, (i+viewPortIndex)%widget.itemCount),
                         ),
                       ),
                     ),
-                  if(viewPortIndex>0&&viewPortIndex>lastViewPortIndex&&value<0.9)
-                    Positioned(
-                      left: 0,
-                      child: Transform.translate(
-                        offset: Offset(
-                          getCurveX( -1, itemWidth, value),
-                          getCurveY( -1, itemWidth, value),
-                        ),
-                        child: Transform.rotate(
-                          angle: getAngle( -1, itemWidth, value),
-                          child: Transform.scale(
-                            scale: getItemScale( -1, value),
-                            child: widget.itemBuilder(context, viewPortIndex-1),
-                          ),
+                  if(forward!=null&&forward!&&value<0.9)
+                    Transform.translate(
+                      offset: Offset(
+                        getCurveX( -1, eachWidth, value),
+                        getCurveY( -1, eachWidth, value),
+                      ),
+                      child: Transform.rotate(
+                        angle: getAngle( -1, eachWidth, value),
+                        child: Transform.scale(
+                          scale: getItemScale( -1, value),
+                          child: widget.itemBuilder(context, (viewPortIndex-1)%widget.itemCount),
                         ),
                       ),
                     ),
-                  if(viewPortIndex<lastViewPortIndex&&value<0.9)
-                    Positioned(
-                      left: 0,
-                      child: Transform.translate(
-                        offset: Offset(
-                          getCurveX( viewPortCount, itemWidth, value),
-                          getCurveY( viewPortCount, itemWidth, value),
-                        ),
-                        child: Transform.rotate(
-                          angle: getAngle( viewPortCount, itemWidth, value),
-                          child: Transform.scale(
-                            scale: getItemScale( viewPortCount, value),
-                            child: widget.itemBuilder(context, viewPortIndex+viewPortCount),
-                          ),
+                  if(forward!=null&&!forward!&&value<0.9)
+                    Transform.translate(
+                      offset: Offset(
+                        getCurveX( viewPortCount, eachWidth, value),
+                        getCurveY( viewPortCount, eachWidth, value),
+                      ),
+                      child: Transform.rotate(
+                        angle: getAngle( viewPortCount, eachWidth, value),
+                        child: Transform.scale(
+                          scale: getItemScale( viewPortCount, value),
+                          child: widget.itemBuilder(context, (viewPortIndex+viewPortCount)%widget.itemCount),
                         ),
                       ),
                     ),
@@ -148,19 +162,19 @@ class _CurvedCarouselState extends State<CurvedCarousel>
   }
 
   double getCurveX(int i, double itemWidth, double value) {
-    if (lastViewPortIndex != -1) {
+    if (forward != null) {
       return interpolate(
-          (i + (lastViewPortIndex < viewPortIndex ? 1 : -1)) * itemWidth,
-          i  * itemWidth,
+          - (currentSelected- i - (forward! ? 1 : -1)) * itemWidth,
+          -(currentSelected-i)  * itemWidth,
           value);
     }
-    return i * itemWidth;
+    return  -(currentSelected-i)  * itemWidth;
   }
 
   double getCurveY(int i, double itemWidth, double value) {
-    if (lastViewPortIndex != -1) {
+    if (forward != null) {
       return interpolate(
-          getCurvePoint(i + (lastViewPortIndex < viewPortIndex ? 1 : -1)),
+          getCurvePoint(i + (forward!? 1 : -1)),
           getCurvePoint(i),
           value);
     }
@@ -178,7 +192,7 @@ class _CurvedCarouselState extends State<CurvedCarousel>
   double getAngle(int i, double itemWidth, double value) {
     if (lastViewPortIndex != -1) {
       return interpolate(
-          getAngleValue(i + (lastViewPortIndex < viewPortIndex ? 1 : -1)),
+          getAngleValue(i + (forward! ? 1 : -1)),
           getAngleValue(i),
           value);
     }
@@ -192,7 +206,7 @@ class _CurvedCarouselState extends State<CurvedCarousel>
     if (lastViewPortIndex != -1) {
       if (currentSelected == i) {
         return interpolate(1, widget.middleItemScaleRatio, value);
-      } else if (i + (lastViewPortIndex < viewPortIndex ? 1 : -1) ==
+      } else if (i + (forward! ? 1 : -1) ==
           currentSelected) {
         return interpolate(widget.middleItemScaleRatio, 1, value);
       }
