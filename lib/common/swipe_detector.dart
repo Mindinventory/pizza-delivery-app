@@ -4,14 +4,15 @@ import 'dart:math' as math;
 class SwipeDetector extends StatelessWidget {
   SwipeDetector(
       {Key? key,
-      required this.child,
-      required this.onSwipe,
-      this.threshold = 10.0})
+        required this.child,
+        required this.onSwipe,
+        this.threshold = 10.0})
       : super(key: key);
   final Widget child;
+  // minimum finger displacement to count as a swipe
   final double threshold;
   final void Function(bool) onSwipe;
-  double? startX;
+  double? _offsetX;
   bool? leftToRightSwipe;
 
   @override
@@ -30,21 +31,19 @@ class SwipeDetector extends StatelessWidget {
   }
 
   void dragStart(event) {
-    if (startX != null) {
-      if ((startX! - event.globalPosition.dx).abs() > threshold) {
-        leftToRightSwipe = startX! < event.globalPosition.dx;
+    if (_offsetX != null) {
+      if ((_offsetX! - event.globalPosition.dx).abs() > threshold) {
+        leftToRightSwipe = _offsetX! < event.globalPosition.dx;
       }
     }
-    startX = event.globalPosition.dx;
+    _offsetX = event.globalPosition.dx;
   }
 
   void dragEnd(event) {
     if (leftToRightSwipe != null) {
       onSwipe(leftToRightSwipe!);
-      print('SWIPE $leftToRightSwipe');
     }
-    startX=null;
+    _offsetX=null;
   }
 
-  void onMove(event) {}
 }

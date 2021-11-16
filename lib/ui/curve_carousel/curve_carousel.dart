@@ -8,7 +8,11 @@ class CurvedCarousel extends StatefulWidget {
       {Key? key,
       required this.itemBuilder,
       required this.itemCount,
-      this.viewPortSize = 0.20, this.curveScale=8, this.scaleMiddleItem=true, this.middleItemScaleRatio=1.2, this.disableInfiniteScrolling=false})
+      this.viewPortSize = 0.20,
+      this.curveScale = 8,
+      this.scaleMiddleItem = true,
+      this.middleItemScaleRatio = 1.2,
+      this.disableInfiniteScrolling = false})
       : super(key: key);
   final Widget Function(BuildContext, int) itemBuilder;
   final int itemCount;
@@ -24,124 +28,105 @@ class CurvedCarousel extends StatefulWidget {
 
 class _CurvedCarouselState extends State<CurvedCarousel>
     with SingleTickerProviderStateMixin {
-  late int currentSelected;
-  late AnimationController controller;
-  late int viewPortCount;
-  bool? forward;
-  int viewPortIndex = 0;
-  int lastViewPortIndex = -1;
-  late double eachWidth;
-  late int count;
+  late int _selectedItemIndex;
+  late int _visibleItemsCount;
+  bool? _forward;
+  int _viewPortIndex = 0;
+  int _lastViewPortIndex = -1;
+  late double _itemWidth;
+  late int _itemsCount;
+
   @override
   void initState() {
     super.initState();
   }
-@override
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-     count= 1 ~/ widget.viewPortSize;
-    eachWidth = (MediaQuery.of(context).size.width / count);
-    viewPortCount = MediaQuery.of(context).size.width ~/ eachWidth;
-    if (viewPortCount % 2 == 0) {
-     if(eachWidth*(viewPortCount+0.5)<= MediaQuery.of(context).size.width)
-       {
-         viewPortCount++;
-       }
-     else{
-       viewPortCount--;
-     }
+    _itemsCount = 1 ~/ widget.viewPortSize;
+    _itemWidth = (MediaQuery.of(context).size.width / _itemsCount);
+    _visibleItemsCount = MediaQuery.of(context).size.width ~/ _itemWidth;
+    if (_visibleItemsCount % 2 == 0) {
+      if (_itemWidth * (_visibleItemsCount + 0.5) <=
+          MediaQuery.of(context).size.width) {
+        _visibleItemsCount++;
+      } else {
+        _visibleItemsCount--;
+      }
     }
-    currentSelected = (viewPortCount - 1) ~/ 2;
+    _selectedItemIndex = (_visibleItemsCount - 1) ~/ 2;
   }
+
   @override
   Widget build(BuildContext context) {
-
     return SwipeDetector(
       threshold: 10,
       onSwipe: (bool) {
         if (!bool) {
-          if (viewPortIndex + viewPortCount < widget.itemCount||!widget.disableInfiniteScrolling) {
-            lastViewPortIndex = viewPortIndex;
-            viewPortIndex = (viewPortIndex + 1)%widget.itemCount;
-            setState(() {});
-            forward=true;
+          // if user swipes right to left side
+          if (_viewPortIndex + _visibleItemsCount < widget.itemCount ||
+              !widget.disableInfiniteScrolling) {
+            moveRight();
           }
-            //
-            // else{
-          //   lastViewPortIndex = viewPortIndex;
-          //   viewPortIndex = viewPortIndex + 1;
-          //   setState(() {});
-          // }
         } else {
-          if (viewPortIndex > 0||!widget.disableInfiniteScrolling) {
-            lastViewPortIndex = viewPortIndex;
-            viewPortIndex = viewPortIndex - 1;
-            if(viewPortIndex<0){
-              viewPortIndex=widget.itemCount-1;
-            }
-            setState(() {});
-            forward=false;
+          // if user swipes left to right side
+          if (_viewPortIndex > 0 || !widget.disableInfiniteScrolling) {
+            moveLeft();
           }
         }
       },
       child: FractionallySizedBox(
         widthFactor: 1,
         child: TweenAnimationBuilder(
-            key: ValueKey(viewPortIndex),
-            curve: Curves.easeInOut,
-            tween: Tween<double>(begin: 0, end: 1),
-            duration: const Duration(milliseconds: 300),
-            builder: (context, double value, child) {
-              return Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  for (int i=0;
-                      i < viewPortCount;
-                      i++)
-                    Transform.translate(
-                      offset: Offset(
-                        getCurveX(i, eachWidth, value),
-                        getCurveY(i, eachWidth, value),
-                      ),
-                      child: Transform.rotate(
-                        angle: getAngle(i, eachWidth, value),
-                        child: Transform.scale(
-                          scale: getItemScale(i , value),
-                          child: widget.itemBuilder(context, (i+viewPortIndex)%widget.itemCount),
-                        ),
-                      ),
+          key: ValueKey(_viewPortIndex),
+          curve: Curves.easeInOut,
+          tween: Tween<double>(begin: 0, end: 1),
+          duration: const Duration(milliseconds: 300),
+          builder: (context, double value, child) {
+            return Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                // All visible items in viewport
+                for (int i = 0; i < _visibleItemsCount; i++)
+                  AnimatedItem(
+                    offset: Offset(
+                      getCurveX(i, _itemWidth, value),
+                      getCurveY(i, _itemWidth, value),
                     ),
-                  if(forward!=null&&forward!&&value<0.9)
-                    Transform.translate(
-                      offset: Offset(
-                        getCurveX( -1, eachWidth, value),
-                        getCurveY( -1, eachWidth, value),
-                      ),
-                      child: Transform.rotate(
-                        angle: getAngle( -1, eachWidth, value),
-                        child: Transform.scale(
-                          scale: getItemScale( -1, value),
-                          child: widget.itemBuilder(context, (viewPortIndex-1)%widget.itemCount),
-                        ),
-                      ),
+                    angle: getAngle(i, _itemWidth, value),
+                    scale: getItemScale(i, value),
+                    child: widget.itemBuilder(
+                        context, (i + _viewPortIndex) % widget.itemCount),
+                  ),
+                if (_forward != null && _forward! && value < 0.9)
+                  AnimatedItem(
+                    offset: Offset(
+                      getCurveX(-1, _itemWidth, value),
+                      getCurveY(-1, _itemWidth, value),
                     ),
-                  if(forward!=null&&!forward!&&value<0.9)
-                    Transform.translate(
-                      offset: Offset(
-                        getCurveX( viewPortCount, eachWidth, value),
-                        getCurveY( viewPortCount, eachWidth, value),
-                      ),
-                      child: Transform.rotate(
-                        angle: getAngle( viewPortCount, eachWidth, value),
-                        child: Transform.scale(
-                          scale: getItemScale( viewPortCount, value),
-                          child: widget.itemBuilder(context, (viewPortIndex+viewPortCount)%widget.itemCount),
-                        ),
-                      ),
+                    angle: getAngle(-1, _itemWidth, value),
+                    scale: getItemScale(-1, value),
+                    child: widget.itemBuilder(
+                        context, (_viewPortIndex - 1) % widget.itemCount),
+                  ),
+                if (_forward != null && !_forward! && value < 0.9)
+                  AnimatedItem(
+                    offset: Offset(
+                      getCurveX(_visibleItemsCount, _itemWidth, value),
+                      getCurveY(_visibleItemsCount, _itemWidth, value),
                     ),
-                ],
-              );
-            }),
+                    angle: getAngle(_visibleItemsCount, _itemWidth, value),
+                    scale: getItemScale(_visibleItemsCount, value),
+                    child: widget.itemBuilder(
+                        context,
+                        (_viewPortIndex + _visibleItemsCount) %
+                            widget.itemCount),
+                  )
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -152,69 +137,110 @@ class _CurvedCarouselState extends State<CurvedCarousel>
   }
 
   double getCurvePoint(int i) {
-    if (currentSelected == i) {
+    if (_selectedItemIndex == i) {
       return 0;
     }
-    // if(i<viewPortCount/2.0){
-    return -((i - currentSelected).abs() * (i - currentSelected).abs() * widget.curveScale)
+    return -((i - _selectedItemIndex).abs() *
+            (i - _selectedItemIndex).abs() *
+            widget.curveScale)
         .toDouble();
-    // }
   }
 
   double getCurveX(int i, double itemWidth, double value) {
-    if (forward != null) {
+    if (_forward != null) {
       return interpolate(
-          - (currentSelected- i - (forward! ? 1 : -1)) * itemWidth,
-          -(currentSelected-i)  * itemWidth,
+          -(_selectedItemIndex - i - (_forward! ? 1 : -1)) * itemWidth,
+          -(_selectedItemIndex - i) * itemWidth,
           value);
     }
-    return  -(currentSelected-i)  * itemWidth;
+    return -(_selectedItemIndex - i) * itemWidth;
   }
 
   double getCurveY(int i, double itemWidth, double value) {
-    if (forward != null) {
+    if (_forward != null) {
       return interpolate(
-          getCurvePoint(i + (forward!? 1 : -1)),
-          getCurvePoint(i),
-          value);
+          getCurvePoint(i + (_forward! ? 1 : -1)), getCurvePoint(i), value);
     }
     return getCurvePoint(i);
   }
 
   double getAngleValue(int i) {
-    if (currentSelected == i) {
+    if (_selectedItemIndex == i) {
       return 0;
     }
-    // if(i<viewPortCount/2.0){
-    return -((i - currentSelected) * pi / (widget.curveScale+5)).toDouble();
+    return -((i - _selectedItemIndex) * pi / (widget.curveScale + 5))
+        .toDouble();
   }
 
   double getAngle(int i, double itemWidth, double value) {
-    if (lastViewPortIndex != -1) {
+    if (_lastViewPortIndex != -1) {
       return interpolate(
-          getAngleValue(i + (forward! ? 1 : -1)),
-          getAngleValue(i),
-          value);
+          getAngleValue(i + (_forward! ? 1 : -1)), getAngleValue(i), value);
     }
     return getAngleValue(i);
   }
 
   double getItemScale(int i, double value) {
-    if(!widget.scaleMiddleItem) {
+    if (!widget.scaleMiddleItem) {
       return 1;
     }
-    if (lastViewPortIndex != -1) {
-      if (currentSelected == i) {
+    if (_lastViewPortIndex != -1) {
+      if (_selectedItemIndex == i) {
         return interpolate(1, widget.middleItemScaleRatio, value);
-      } else if (i + (forward! ? 1 : -1) ==
-          currentSelected) {
+      } else if (i + (_forward! ? 1 : -1) == _selectedItemIndex) {
         return interpolate(widget.middleItemScaleRatio, 1, value);
       }
     }
-    if (currentSelected == i) {
+    if (_selectedItemIndex == i) {
       return widget.middleItemScaleRatio;
     } else {
       return 1;
     }
+  }
+
+  void moveRight() {
+    _lastViewPortIndex = _viewPortIndex;
+    _viewPortIndex = (_viewPortIndex + 1) % widget.itemCount;
+    setState(() {});
+    _forward = true;
+  }
+
+  void moveLeft() {
+    _lastViewPortIndex = _viewPortIndex;
+    _viewPortIndex = _viewPortIndex - 1;
+    if (_viewPortIndex < 0) {
+      _viewPortIndex = widget.itemCount - 1;
+    }
+    setState(() {});
+    _forward = false;
+  }
+}
+
+class AnimatedItem extends StatelessWidget {
+  final Offset offset;
+  final double angle;
+  final double scale;
+  final Widget child;
+
+  const AnimatedItem(
+      {Key? key,
+      required this.offset,
+      required this.angle,
+      required this.scale,
+      required this.child})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform.translate(
+      offset: offset,
+      child: Transform.rotate(
+        angle: angle,
+        child: Transform.scale(
+          scale: scale,
+          child: child,
+        ),
+      ),
+    );
   }
 }

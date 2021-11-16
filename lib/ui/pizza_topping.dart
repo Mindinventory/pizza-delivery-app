@@ -27,6 +27,7 @@ class PizzaToppingListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final listItem=BlocProvider.of<PizzaCubit>(context,listen: false).toppingList;
+
     return FractionallySizedBox(
       widthFactor: 1
       ,child: CurvedCarousel(
@@ -42,6 +43,7 @@ class PizzaToppingListView extends StatelessWidget {
           }, selected: listItem[i].selected,key: ValueKey(listItem[i].selected),);
         },
         itemCount: listItem.length,
+      middleItemScaleRatio: 1.5,
     ),
     );
   }
