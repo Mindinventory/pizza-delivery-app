@@ -1,8 +1,26 @@
 import 'dart:ui';
 
+import 'package:pizza_delivery/core/res/app_strings.dart';
 import 'package:pizza_delivery/ui/custom_painters.dart';
 
-enum PizzaSize { small, medium, large }
+enum PizzaSize {
+  small, medium, large
+}
+
+extension PizzaSizeExtension on PizzaSize {
+  String get pizzaSize {
+    switch(this){
+      case PizzaSize.small:
+        return AppStrings.sizeS;
+
+      case PizzaSize.medium:
+        return AppStrings.sizeM;
+
+      case PizzaSize.large:
+        return AppStrings.sizeL;
+    }
+  }
+}
 
 class PizzaViewModel {
   final String name;

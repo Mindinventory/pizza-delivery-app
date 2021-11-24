@@ -8,7 +8,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Pizza Delivery App',
-      home: Material(child: HomePage()),
+      home: HomePage(),
     );
   }
 }

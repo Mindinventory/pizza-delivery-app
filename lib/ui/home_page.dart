@@ -12,7 +12,11 @@ import 'package:pizza_delivery/common/app_fonts.dart';
 import 'package:pizza_delivery/common/swipe_detector.dart';
 import 'package:pizza_delivery/common/time_duration.dart';
 import 'package:pizza_delivery/constant/colors.dart';
+import 'package:pizza_delivery/core/res/app_assets.dart';
+import 'package:pizza_delivery/core/res/app_strings.dart';
 import 'package:pizza_delivery/cubit/pizza_cubit.dart';
+import 'package:pizza_delivery/extensions/context_extension.dart';
+import 'package:pizza_delivery/extensions/dimension_extension.dart';
 import 'package:pizza_delivery/ui/custom_painters.dart';
 import 'package:pizza_delivery/ui/pizza_topping.dart';
 import 'package:pizza_delivery/viewmodel/pizza_viewmodel.dart';
@@ -26,202 +30,492 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
-  final PizzaCubit pizzaCubit = PizzaCubit();
-  late final AnimationController animationController;
-  int count = -1, saladCount=0;
+  final PizzaCubit _pizzaCubit = PizzaCubit();
 
-  int? pizzaIndex;
+  int _count = -1, _saladCount=0;
+  int? _pizzaIndex;
 
   @override
   void initState() {
     super.initState();
-
-    animationController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 1));
   }
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: _mainBlocProvider(),
+      ),
+    );
+  }
+
+  Widget _mainBlocProvider() {
     return BlocProvider(
-      create: (context) => pizzaCubit,
-      child: SafeArea(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Stack(
-            children: [
-              Column(
-                children: [
-                  _buildTopTitle(),
-                  _buildPizza(),
-                  const Spacer(),
-                  SizedBox(
-                    height: 50.0,
-                    width: 180.0,
-                    child: SizedBox(
-                      width: 174,
-                      child:
-                      StatefulBuilder(builder: (context, setStateForSize) {
-                        return Stack(
-                          alignment: Alignment.centerLeft,
-                          children: [
-                            Row(
-                              children: [
-                                SizeButton(
-                                  onTap: () {
-                                    if (pizzaCubit.pizzaSize !=
-                                        PizzaSize.small) {
-                                      final old = pizzaCubit.pizzaSize;
-                                      pizzaCubit.pizzaSize = PizzaSize.small;
-                                      setStateForSize(() {});
-                                      count++;
-                                      pizzaCubit.changePizzaSize(old);
-                                    }
-                                  },
-                                  text: 'S',
-                                  isSelected:
-                                  pizzaCubit.pizzaSize == PizzaSize.small,
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                SizeButton(
-                                    onTap: () {
-                                      if (pizzaCubit.pizzaSize !=
-                                          PizzaSize.medium) {
-                                        final old = pizzaCubit.pizzaSize;
-                                        pizzaCubit.pizzaSize = PizzaSize.medium;
-                                        setStateForSize(() {});
-                                        count++;
-                                        pizzaCubit.changePizzaSize(old);
-                                      }
-                                    },
-                                    text: 'M',
-                                    isSelected: pizzaCubit.pizzaSize ==
-                                        PizzaSize.medium),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                SizeButton(
-                                    onTap: () {
-                                      if (pizzaCubit.pizzaSize !=
-                                          PizzaSize.large) {
-                                        final old = pizzaCubit.pizzaSize;
-                                        pizzaCubit.pizzaSize = PizzaSize.large;
-                                        setStateForSize(() {});
-                                        count++;
-                                        pizzaCubit.changePizzaSize(old);
-                                      }
-                                    },
-                                    text: 'L',
-                                    isSelected: pizzaCubit.pizzaSize ==
-                                        PizzaSize.large),
-                              ],
-                            ),
-                            AnimatedPositioned(
-                                child: CircleAvatar(
-                                  radius: 24,
-                                  child: Text(
-                                    pizzaCubit.pizzaSize == PizzaSize.large
-                                        ? 'L'
-                                        : (pizzaCubit.pizzaSize ==
-                                        PizzaSize.medium
-                                        ? 'M'
-                                        : 'S'),
-                                    style: GoogleFonts.playfairDisplay(
-                                        fontSize: 18.0, color: AppColors.brown),
-                                  ),
-                                  backgroundColor: AppColors.orange,
-                                ),
-                                left: pizzaCubit.pizzaSize == PizzaSize.small
-                                    ? 0
-                                    : (pizzaCubit.pizzaSize == PizzaSize.medium
-                                    ? 63
-                                    : 126),
-                                duration: const Duration(milliseconds: 200)),
-                          ],
-                        );
-                      }),
-                    ),
-                  ),
-                  const Spacer(),
-                  BlocConsumer<PizzaCubit, PizzaState>(
-                    listener: (context, state) {
-                      // TODO: implement listener
-                    },
-                    builder: (context, state) {
-                      return Column(
+      create: (context) => _pizzaCubit,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                _TopTitle(
+                  pizzaCubit: _pizzaCubit,
+                  count: _count,
+                  pizzaIndex: _pizzaIndex ?? 0,
+                ),
+                const Spacer(),
+                _buildPizza(),
+                const Spacer(),
+                StatefulBuilder(
+                    builder: (context, setStateForSize) {
+                      return Stack(
                         children: [
-                          SizedBox(
-                            height: 20,
-                            child: _toppingsCounter(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _SizeButton(
+                                onTap: () {
+                                  if (_pizzaCubit.pizzaSize != PizzaSize.small) {
+                                    final old = _pizzaCubit.pizzaSize;
+                                    _pizzaCubit.pizzaSize = PizzaSize.small;
+                                    setStateForSize(() {});
+                                    _count++;
+                                    _pizzaCubit.changePizzaSize(old);
+                                  }
+                                },
+                                text: AppStrings.sizeS,
+                                isSelected: _pizzaCubit.pizzaSize == PizzaSize.small,
+                              ),
+                              SizedBox(width: 15.toSize(context)),
+                              _SizeButton(
+                                onTap: () {
+                                  if (_pizzaCubit.pizzaSize != PizzaSize.medium) {
+                                    final old = _pizzaCubit.pizzaSize;
+                                    _pizzaCubit.pizzaSize = PizzaSize.medium;
+                                    setStateForSize(() {});
+                                    _count++;
+                                    _pizzaCubit.changePizzaSize(old);
+                                  }
+                                },
+                                text: AppStrings.sizeM,
+                                isSelected: _pizzaCubit.pizzaSize == PizzaSize.medium,
+                              ),
+                              SizedBox(width: 15.toSize(context)),
+                              _SizeButton(
+                                onTap: () {
+                                  if (_pizzaCubit.pizzaSize != PizzaSize.large) {
+                                    final old = _pizzaCubit.pizzaSize;
+                                    _pizzaCubit.pizzaSize = PizzaSize.large;
+                                    setStateForSize(() {});
+                                    _count++;
+                                    _pizzaCubit.changePizzaSize(old);
+                                  }
+                                },
+                                text: AppStrings.sizeL,
+                                isSelected: _pizzaCubit.pizzaSize == PizzaSize.large,
+                              ),
+                            ],
                           ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          SizedBox(
-                            height: 70,
-                            child: PizzaToppingListView(),
+                          AnimatedPositioned(
+                            child: CircleAvatar(
+                              radius: 24.toSize(context),
+                              child: Text(
+                                _pizzaCubit.pizzaSize.pizzaSize,
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 18.0.toSize(context),
+                                  color: AppColors.brown,
+                                ),
+                              ),
+                              backgroundColor: AppColors.orange,
+                            ),
+                            left: _getLeftPadding(),
+                            duration: const Duration(milliseconds: 200),
                           ),
                         ],
                       );
                     },
                   ),
-                  const Spacer(),
-                  SizedBox(
-                    width: MediaQuery
-                        .of(context)
-                        .size
-                        .width,
-                    height: 100,
-                    child: Stack(
-                      children: [
-                        CustomPaint(
-                          painter: CurveLinePainter(
-                              MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width),
-                        ),
-                        Center(child: _addToCartButton()),
-                      ],
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 20.toSize(context),
+                      child: _ToppingsCounter(pizzaCubit: _pizzaCubit,),
                     ),
+                    SizedBox(height: 10.toSize(context)),
+                    PizzaToppingListView(),
+                  ],
+                ),
+                const Spacer(),
+                SizedBox(
+                  width: context.width,
+                  height: 100.toSize(context),
+                  child: Stack(
+                    children: [
+                      CustomPaint(
+                        painter: CurveLinePainter(
+                          context.width,
+                        ),
+                      ),
+                      const Center(child: _AddToCart()),
+                    ],
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                ],
+                ),
+                SizedBox(height: 10.toSize(context)),
+              ],
+            ),
+            _ToppingView(pizzaCubit: _pizzaCubit,),
+            Padding(
+              key: const ObjectKey('add'),
+              padding: EdgeInsets.only(left: 60.0.toSize(context), top: 230.toSize(context)),
+              child: SizedBox(
+                height: 30.toSize(context),
+                width: 30.toSize(context),
+                child: const _CircularButton(icon: Icons.remove),
               ),
-              _buildToppingView(),
-              Padding(
-                key: const ObjectKey('add'),
-                padding:
-                const EdgeInsets.symmetric(horizontal: 60.0, vertical: 230),
+            ),
+            Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                key: const ObjectKey('remove'),
+                padding: EdgeInsets.only(right: 60.0.toSize(context), top: 230.toSize(context)),
                 child: SizedBox(
-                  height: 30,
-                  width: 30,
-                  child: _circularButton(Icons.remove),
+                  height: 30.toSize(context),
+                  width: 30.toSize(context),
+                  child: const _CircularButton(icon: Icons.add),
                 ),
               ),
-              Align(
-                alignment: Alignment.topRight,
-                child: Padding(
-                  key: const ObjectKey('remove'),
-                  padding: const EdgeInsets.only(right: 60.0, top: 230),
-                  child: SizedBox(
-                    height: 30,
-                    width: 30,
-                    child: _circularButton(Icons.add),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildPizzaNameAndDesc() {
+  Widget _buildPizza() {
+    final deviceWidth = context.width;
+
+    return BlocBuilder<PizzaCubit, PizzaState>(
+      bloc: _pizzaCubit,
+      buildWhen: (prev, current) {
+        return true;
+      },
+      builder: (context, state) {
+        if (state.runtimeType == PizzaToppingChangeState) {
+          _count++;
+        }
+        final pizzaSize = _getPizzaSize(_pizzaCubit.pizzaSize, context);
+        final prevPizzaSize = pizzaSize - 50.toSize(context);
+        bool? rightSwipe = (state.runtimeType == PizzaChangeState)
+            ? (state as PizzaChangeState).rightSide
+            : null;
+        late final double? oldPizzaSize;
+        if (state.runtimeType == PizzaChangeSizeState) {
+          oldPizzaSize = _getPizzaSize((state as PizzaChangeSizeState).oldSize, context);
+        } else {
+          oldPizzaSize = null;
+        }
+
+        return SwipeDetector(
+          onSwipe: _onSwipe,
+          child: TweenAnimationBuilder(
+            key: ValueKey(_count),
+            tween: Tween<double>(begin: 0, end: 1),
+            duration: _getTweenAnimationDuration(state, rightSwipe),
+            curve: rightSwipe != null
+                ? Curves.linearToEaseOut
+                : Curves.easeInOutBack,
+            onEnd: () {
+              if (rightSwipe != null) {
+                if (_pizzaCubit.selectedPizza != _pizzaIndex) {
+                  _pizzaCubit.selectedPizza = _pizzaIndex!;
+                  _pizzaCubit.emit(PizzaChangedState());
+                }
+              }
+            },
+            builder: (context, double value, child) {
+              final pizzaChangedSize = rightSwipe != null
+                  ? (value < 0.4)
+                      ? (pizzaSize - ((value + 0.7) * (pizzaSize - prevPizzaSize)))
+                      : prevPizzaSize
+                  : pizzaSize;
+              final size2 = (oldPizzaSize != null
+                  ? (oldPizzaSize + (value < 0.4
+                     ? 0
+                     : (value - 0.4) * (value - 0.4) * (pizzaSize / (pizzaSize * 0.36))) * (pizzaSize - oldPizzaSize))
+                  : pizzaChangedSize);
+              final plateSize = (oldPizzaSize != null
+                  ? (oldPizzaSize + 30 + (value > 0.6 ? value * value : value) * (pizzaSize - oldPizzaSize))
+                  : (pizzaSize + 30));
+              final double? saladCurrentAngle = (rightSwipe != null)
+                  ? ((rightSwipe ? (_saladCount + 1) : (_saladCount - 1)) * pi / 6)
+                  : null;
+              late final double? saladNewAngle = _saladCount * pi / 6;
+
+              return Column(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Transform.rotate(
+                        angle: saladCurrentAngle != null
+                            ? (saladCurrentAngle + (saladNewAngle! - saladCurrentAngle) * (value * value))
+                            : saladNewAngle!,
+                        child: Image.asset(
+                          AppAssets.circleSalad,
+                          width: plateSize + 50,
+                          fit: BoxFit.fitWidth,
+                          filterQuality: ui.FilterQuality.low,
+                        ),
+                      ),
+                      Transform.rotate(
+                        angle: rightSwipe != null
+                            ? pi / 6 * (1 - value) * sin(value * 3 * pi)
+                            : 0,
+                        child: PhysicalModel(
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.circular(plateSize / 2),
+                          color: Colors.transparent,
+                          elevation: 10,
+                          child: Image.asset(
+                            AppAssets.woodenPlate,
+                            width: plateSize,
+                            height: plateSize,
+                            fit: BoxFit.fitWidth,
+                            filterQuality: ui.FilterQuality.low,
+                          ),
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: rightSwipe != null
+                            ? Offset(
+                                value * (rightSwipe
+                                        ? (deviceWidth / 2) + (prevPizzaSize / 2)
+                                        : -((deviceWidth / 2) + (prevPizzaSize / 2))),
+                                0,
+                              )
+                            : const Offset(0, 0),
+                        child: Transform.rotate(
+                          angle: rightSwipe != null
+                              ? (rightSwipe ? 1 : -1) *
+                                  pi *
+                                  ((value - 0.4) > 0 ? value - 0.4 : 0)
+                              : 0.6 * pi,
+                          child: Image.asset(
+                            _pizzaCubit.pizzaList[_pizzaCubit.selectedPizza].imgPath,
+                            width: size2,
+                            height: size2,
+                            fit: BoxFit.fitWidth,
+                          ),
+                        ),
+                      ),
+                      if (rightSwipe != null)
+                        Transform.translate(
+                            offset: Offset(
+                              (1 - value) *
+                                  (rightSwipe
+                                      ? -((deviceWidth / 2) + (pizzaSize / 2))
+                                      : (deviceWidth / 2) + (pizzaSize / 2)),
+                              0,
+                            ),
+                            child: Transform.rotate(
+                              angle: pi * ((value - 0.4) > 0 ? value - 0.4 : 0),
+                              child: Image.asset(
+                                _pizzaCubit.pizzaList[_pizzaIndex!].imgPath,
+                                width: pizzaSize,
+                                height: pizzaSize,
+                                fit: BoxFit.fitWidth,
+                              ),
+                            ),
+                          ),
+                    ],
+                  ),
+                  const SizedBox(height: 15.0,),
+                  _buildPrice(
+                    value,
+                    rightSwipe,
+                    state.runtimeType == PizzaChangeSizeState
+                        ? (state as PizzaChangeSizeState).oldSize
+                        : null,
+                    state,
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _onSwipe(bool isRightSwipe) {
+    if (_pizzaIndex != null && _pizzaIndex != _pizzaCubit.selectedPizza) {
+      _pizzaCubit.emit(PizzaChangedState());
+      _pizzaCubit.selectedPizza = _pizzaIndex!;
+    }
+    if (isRightSwipe) {
+      if (_pizzaCubit.selectedPizza > 0) {
+        _pizzaIndex = _pizzaCubit.selectedPizza - 1;
+      } else {
+        _pizzaIndex = _pizzaCubit.pizzaList.length - 1;
+      }
+      _count = _pizzaIndex!;
+      _saladCount = _saladCount - 1;
+      if (_saladCount < 0) {
+        _saladCount = 11;
+      }
+      _pizzaCubit.changePizzaState(isRightSwipe);
+    } else {
+      if (_pizzaCubit.pizzaList.length - 1 > _pizzaCubit.selectedPizza) {
+        _pizzaIndex = _pizzaCubit.selectedPizza + 1;
+      } else {
+        _pizzaIndex = 0;
+      }
+      _count = _pizzaIndex!;
+      _saladCount = (_saladCount + 1) % 12;
+      _pizzaCubit.changePizzaState(isRightSwipe);
+    }
+  }
+
+  double _getPizzaPrice(PizzaSize size) {
+    switch (size) {
+      case PizzaSize.medium:
+        return 0;
+      case PizzaSize.small:
+        return -3;
+      case PizzaSize.large:
+        return 3;
+    }
+  }
+
+  Widget _buildPrice(double value, bool? rightSwipe, PizzaSize? oldPizzaSize,
+      PizzaState state) {
+    double oldToppingPrice = 0.0,
+        newToppingPrice = 0.0;
+    if (rightSwipe == null) {
+      for (final topping in _pizzaCubit.toppingList) {
+        if (topping.selected) {
+          oldToppingPrice += topping.price;
+        }
+      }
+    }
+    newToppingPrice = oldToppingPrice;
+    if (state.runtimeType == PizzaToppingChangeState) {
+      if ((state as PizzaToppingChangeState).added) {
+        oldToppingPrice -= state.topping.price;
+      } else {
+        newToppingPrice -= state.topping.price;
+      }
+    }
+    final oldPrice = _pizzaCubit.pizzaList[_pizzaCubit.selectedPizza].price +
+        (oldPizzaSize != null ? _getPizzaPrice(oldPizzaSize) : 0) + oldToppingPrice;
+
+    final changedPizzaPrice = (rightSwipe != null
+        ? _pizzaCubit.pizzaList[_pizzaIndex!].price
+        : (_pizzaCubit.pizzaList[_pizzaCubit.selectedPizza].price)) +
+        (_getPizzaPrice(_pizzaCubit.pizzaSize)) + newToppingPrice;
+
+    final interpolate = oldPrice != changedPizzaPrice
+        ? (oldPrice + (changedPizzaPrice - oldPrice) * value)
+        : oldPrice;
+
+    return Text(
+      '\$${interpolate.toStringAsFixed(2)}',
+      style: AppFonts.pizzaPriceFont,
+    );
+  }
+
+  double _getLeftPadding() {
+
+    double buttonSize = 24.toSize(context);
+    double buttonPadding = 15.toSize(context);
+    double screenPadding = (2.8).toSize(context);
+
+    return _pizzaCubit.pizzaSize == PizzaSize.small
+        ?  (context.width / 2) - buttonSize - (buttonPadding / 2) - screenPadding - (buttonSize + (buttonPadding + buttonSize))
+        : (_pizzaCubit.pizzaSize == PizzaSize.medium
+        ? (context.width / 2) - buttonSize - (buttonPadding / 2) - screenPadding
+        : ((context.width / 2) - buttonSize - (buttonPadding / 2) - screenPadding) + (buttonSize + (buttonPadding + buttonSize)));
+  }
+
+  Duration _getTweenAnimationDuration(PizzaState state, bool? rightSwipe) {
+    if (rightSwipe != null) {
+      return pizzaChangingDuration;
+    }
+    switch (state.runtimeType) {
+      case PizzaChangeSizeState:
+        return const Duration(milliseconds: 800);
+      case PizzaToppingChangeState:
+        return const Duration(milliseconds: 500);
+      default:
+        return const Duration(seconds: 0);
+    }
+  }
+}
+
+class _TopTitle extends StatelessWidget {
+  const _TopTitle({
+    required this.pizzaCubit,
+    required this.count,
+    required this.pizzaIndex,
+  });
+
+  final PizzaCubit pizzaCubit;
+  final int count;
+  final int pizzaIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        InkWell(
+          borderRadius: BorderRadius.circular(13),
+          onTap: () {},
+          child: Image.asset(
+            AppAssets.leftArrow,
+            height: 25.0.toSize(context),
+            width: 25.0.toSize(context),
+          ),
+        ),
+        SizedBox(width: 15.toSize(context)),
+        Expanded(
+          child: _PizzaNameAndDesc(
+            pizzaCubit: pizzaCubit,
+            count: count,
+            pizzaIndex: pizzaIndex,
+          ),
+        ),
+        SizedBox(width: 15.toSize(context)),
+        InkWell(
+          borderRadius: BorderRadius.circular(15),
+          child: Image.asset(
+            AppAssets.heart,
+            height: 25.0.toSize(context),
+            width: 25.0.toSize(context),
+          ),
+          onTap: () {},
+        ),
+      ],
+    );
+  }
+}
+
+class _PizzaNameAndDesc extends StatelessWidget {
+  const _PizzaNameAndDesc({
+    required this.pizzaCubit,
+    required this.count,
+    required this.pizzaIndex,
+  });
+
+  final PizzaCubit pizzaCubit;
+  final int count;
+  final int pizzaIndex;
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<PizzaCubit, PizzaState>(
       bloc: pizzaCubit,
       buildWhen: (prev, current) {
@@ -243,8 +537,7 @@ class _HomePageState extends State<HomePage>
               alignment: Alignment.center,
               children: [
                 Transform(
-                  transform: Matrix4.identity()
-                    ..rotateX(-(1 - value) * pi / 2),
+                  transform: Matrix4.identity()..rotateX(-(1 - value) * pi / 2),
                   child: Opacity(
                     opacity: rightSide != null ? 1 - value : 1,
                     child: Column(
@@ -254,12 +547,9 @@ class _HomePageState extends State<HomePage>
                           pizzaCubit.pizzaList[pizzaCubit.selectedPizza].name,
                           style: AppFonts.pizzaTitleFont,
                         ),
-                        const SizedBox(
-                          height: 5,
-                        ),
+                        const SizedBox(height: 5),
                         Text(
-                          pizzaCubit
-                              .pizzaList[pizzaCubit.selectedPizza].description,
+                          pizzaCubit.pizzaList[pizzaCubit.selectedPizza].description,
                           style: AppFonts.pizzaDescriptionFont,
                         ),
                       ],
@@ -276,18 +566,12 @@ class _HomePageState extends State<HomePage>
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            pizzaCubit
-                                .pizzaList[pizzaIndex!]
-                                .name,
+                            pizzaCubit.pizzaList[pizzaIndex].name,
                             style: AppFonts.pizzaTitleFont,
                           ),
-                          const SizedBox(
-                            height: 5,
-                          ),
+                          const SizedBox(height: 5),
                           Text(
-                            pizzaCubit
-                                .pizzaList[pizzaIndex!]
-                                .description,
+                            pizzaCubit.pizzaList[pizzaIndex].description,
                             style: AppFonts.pizzaDescriptionFont,
                           ),
                         ],
@@ -297,364 +581,146 @@ class _HomePageState extends State<HomePage>
               ],
             );
           },
-          duration:pizzaChangingDuration,
+          duration: pizzaChangingDuration,
         );
       },
     );
   }
+}
 
-  Widget _toppingsCounter() {
-    return Text(
-      '${pizzaCubit.toppings.length}/${pizzaCubit.toppingList.length}',
-      style: const TextStyle(
-        color: Colors.grey,
-      ),
-    );
-  }
+class _ToppingView extends StatelessWidget {
+  const _ToppingView({required this.pizzaCubit});
 
-  Widget _buildTopTitle() {
-    return SizedBox(
-      height: 70,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(13),
-            onTap: () {},
-            child: Image.asset(
-              'assets/icons/left-arrow.png',
-              height: 26.0,
-              width: 26.0,
-            ),
-          ),
-          const SizedBox(
-            width: 15,
-          ),
-          Expanded(child: _buildPizzaNameAndDesc(),),
-          const SizedBox(
-            width: 15,
-          ),
-          InkWell(
-            borderRadius: BorderRadius.circular(15),
-            child: Image.asset(
-              'assets/icons/heart.png',
-              height: 25.0,
-              width: 25.0,
-            ),
-            onTap: () {},
-          ),
-        ],
-      ),
-    );
-  }
+  final PizzaCubit pizzaCubit;
 
-  Widget _buildPizza() {
-    final deviceWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
-
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<PizzaCubit, PizzaState>(
       bloc: pizzaCubit,
       buildWhen: (prev, current) {
-        // if (current.runtimeType == PizzaChangeState ||
-        //     current.runtimeType == PizzaChangedState ||
-        //     current.runtimeType == PizzaChangeSizeState) {
-        return true;
-        // }
-        // return false;
+        if (current.runtimeType == PizzaToppingChangeState ||
+            pizzaCubit.toppings.isEmpty) {
+          return true;
+        }
+        return false;
       },
       builder: (context, state) {
-        if (state.runtimeType == PizzaToppingChangeState) {
-          count++;
-        }
-        final pizzaSize = getPizzaSize(pizzaCubit.pizzaSize);
-        final prevPizzaSize = pizzaSize - 50;
-        bool? rightSwipe = (state.runtimeType == PizzaChangeState)
-            ? (state as PizzaChangeState).rightSide
-            : null;
-        late final double? oldPizzaSize;
-        if (state.runtimeType == PizzaChangeSizeState) {
-          oldPizzaSize = getPizzaSize((state as PizzaChangeSizeState).oldSize);
-        } else {
-          oldPizzaSize = null;
-        }
+        return Stack(
+          children: [
+            for (Topping topping in pizzaCubit.toppings)
+              FutureBuilder<ui.Image>(
+                future: Future(() async {
+                  final ByteData data = await rootBundle.load(topping.unitImg);
+                  final Completer<ui.Image> completer = Completer();
+                  ui.decodeImageFromList(
+                    Uint8List.view(data.buffer),
+                    (ui.Image img) {
+                      return completer.complete(img);
+                    },
+                  );
+                  return completer.future;
+                }),
+                key: ValueKey(topping.img),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return TweenAnimationBuilder(
+                      key: ValueKey(topping.img),
+                      tween: Tween<double>(begin: 0, end: 1),
+                      builder: (context, double value, child) {
+                        return CustomPaint(
+                          painter: TopperPainter(
+                            deviceWidth: context.width.toInt(),
+                            deviceHeight: context.height.toInt(),
+                            img: snapshot.data!,
+                            value: value,
+                            positions: topping.positions,
+                            pizzaSize: _getPizzaSize(pizzaCubit.pizzaSize, context),
+                            context: context,
+                          ),
+                        );
+                      },
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.decelerate,
+                    );
+                  }
+                  return Container();
+                },
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
 
-        return SwipeDetector(
-          // swipeConfig: const SimpleSwipeConfig(horizontalThreshold: 2),
-          // onHorizontalSwipe: (direction) {
-          //   onSwipe(direction == SwipeDirection.right);
-          // },
-          onSwipe: onSwipe,
-          child: TweenAnimationBuilder(
-            key: ValueKey(count),
-            tween: Tween<double>(begin: 0, end: 1),
-            duration: getTweenAnimationDuration(state, rightSwipe),
-            curve: rightSwipe != null
-                ? Curves.linearToEaseOut
-                : Curves.easeInOutBack,
-            onEnd: () {
-              if (rightSwipe != null) {
-                if (pizzaCubit.selectedPizza != pizzaIndex) {
-                  pizzaCubit.selectedPizza = pizzaIndex!;
+class _SizeButton extends StatelessWidget {
+  const _SizeButton({
+    Key? key,
+    required this.onTap,
+    required this.text,
+    required this.isSelected,
+  }) : super(key: key);
+  final void Function() onTap;
+  final bool isSelected;
+  final String text;
 
-                  pizzaCubit.emit(PizzaChangedState());
-                }
-              }
-            },
-            builder: (context, double value, child) {
-              final pizzaChangedSize = rightSwipe != null
-                  ? (value < 0.4)
-                  ? (pizzaSize -
-                  ((value + 0.7) * (pizzaSize - prevPizzaSize)))
-                  : prevPizzaSize
-                  : pizzaSize;
-              final size2 = (oldPizzaSize != null
-                  ? (oldPizzaSize +
-                  (value < 0.4
-                      ? 0
-                      : (value - 0.4) *
-                      (value - 0.4) *
-                      (pizzaSize / (pizzaSize * 0.36))) *
-                      (pizzaSize - oldPizzaSize))
-                  : pizzaChangedSize);
-              final plateSize = (oldPizzaSize != null
-                  ? (oldPizzaSize +
-                  30 +
-                  (value > 0.6 ? value * value : value) *
-                      (pizzaSize - oldPizzaSize))
-                  : (pizzaSize + 30));
-              final double? saladCurrentAngle =(rightSwipe!=null)? ((rightSwipe?(saladCount+1):(saladCount-1))* pi / 6):null;
-              late final double? saladNewAngle=saladCount * pi / 6;
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        onTap.call();
+      },
+      child: PhysicalModel(
+        elevation: 2,
+        color: Colors.white,
+        shape: BoxShape.circle,
+        child: CircleAvatar(
+          backgroundColor: Colors.white,
+          radius: 24.toSize(context),
+          child: Text(
+            text,
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 18.0.toSize(context),
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-              return Column(
-                children: [
-                  SizedBox(
-                    height: 350,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Transform.rotate(
-                          angle: saladCurrentAngle != null
-                              ? (saladCurrentAngle +
-                              (saladNewAngle! - saladCurrentAngle) *
-                                  (value*value))
-                              : saladNewAngle!,
-                          child: Image.asset(
-                            'assets/images/circle_salad.png',
-                            width: plateSize + 50,
-                            fit: BoxFit.fitWidth,
-                            filterQuality: ui.FilterQuality.low,
-                          ),
-                        ),
-                        Transform.rotate(
-                          angle: rightSwipe != null
-                              ? pi / 6 * (1 - value) * sin(value * 3 * pi)
-                              : 0,
-                          //((2*value*value*value)+((1-value)*(1-value))-value)*pi/3
-                          child: PhysicalModel(
-                            shape: BoxShape.rectangle,
-                            borderRadius: BorderRadius.circular(plateSize / 2),
-                            color: Colors.transparent,//Colors.brown.shade800,
-                            elevation: 10,
-                            child: Image.asset(
-                              'assets/images/wooden_plate.png',
-                              width: plateSize,
-                              height: plateSize,
-                              fit: BoxFit.fitWidth,
-                              filterQuality: ui.FilterQuality.low,
-                            ),
-                          ),
-                        ),
-                        Transform.translate(
-                          offset: rightSwipe != null
-                              ? Offset(
-                              value *
-                                  (rightSwipe
-                                      ? (deviceWidth / 2) +
-                                      (prevPizzaSize / 2)
-                                      : -((deviceWidth / 2) +
-                                      (prevPizzaSize / 2))),
-                              0)
-                              : const Offset(0, 0),
-                          child: Transform.rotate(
-                            angle: rightSwipe != null
-                                ? (rightSwipe ? 1 : -1) *
-                                pi *
-                                ((value - 0.4) > 0 ? value - 0.4 : 0)
-                                : 0.6 * pi,
-                            child: Image.asset(
-                              pizzaCubit
-                                  .pizzaList[pizzaCubit.selectedPizza].imgPath,
-                              width: size2,
-                              height: size2,
-                              fit: BoxFit.fitWidth,
-                            ),
-                          ),
-                        ),
-                        if (rightSwipe != null)
-                          Transform.translate(
-                            offset: Offset(
-                                (1 - value) *
-                                    (rightSwipe
-                                        ? -((deviceWidth / 2) + (pizzaSize / 2))
-                                        : (deviceWidth / 2) + (pizzaSize / 2)),
-                                0),
-                            child: Transform.rotate(
-                              angle: pi * ((value - 0.4) > 0 ? value - 0.4 : 0),
-                              child: Image.asset(
-                                pizzaCubit
-                                    .pizzaList[pizzaIndex!]
-                                    .imgPath,
-                                width: pizzaSize,
-                                height: pizzaSize,
-                                fit: BoxFit.fitWidth,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  _buildPrice(
-                      value,
-                      rightSwipe,
-                      state.runtimeType == PizzaChangeSizeState
-                          ? (state as PizzaChangeSizeState).oldSize
-                          : null,
-                      state),
-                ],
-              );
-            },
+class _ToppingsCounter extends StatelessWidget {
+  const _ToppingsCounter({required this.pizzaCubit});
+
+  final PizzaCubit pizzaCubit;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<PizzaCubit, PizzaState>(
+      bloc: pizzaCubit,
+      builder: (context, state) {
+        return Text(
+          '${pizzaCubit.toppings.length}/${pizzaCubit.toppingList.length}',
+          style: const TextStyle(
+            color: Colors.grey,
           ),
         );
       },
     );
   }
+}
 
-  void onSwipe(bool isRightSwipe) {
-    if (pizzaIndex != null && pizzaIndex != pizzaCubit.selectedPizza) {
-      pizzaCubit.emit(PizzaChangedState());
-      pizzaCubit.selectedPizza = pizzaIndex!;
-    }
-    if (isRightSwipe) {
-      if (pizzaCubit.selectedPizza > 0) {
+class _AddToCart extends StatelessWidget {
+  const _AddToCart({Key? key,}) : super(key: key);
 
-        pizzaIndex = pizzaCubit.selectedPizza - 1;
-      }
-      else {
-
-        pizzaIndex = pizzaCubit.pizzaList.length - 1;
-      }
-      count=pizzaIndex!;
-      saladCount=saladCount-1;
-      if(saladCount<0){
-        saladCount=11;
-      }
-      pizzaCubit.changePizzaState(isRightSwipe);
-    } else {
-      if (pizzaCubit.pizzaList.length - 1 > pizzaCubit.selectedPizza) {
-
-        pizzaIndex = pizzaCubit.selectedPizza + 1;
-      }
-      else {
-        pizzaIndex = 0;
-      }
-      count=pizzaIndex!;
-
-      saladCount=(saladCount+1)%12;
-      pizzaCubit.changePizzaState(isRightSwipe);
-    }
-  }
-
-  Widget _circularButton(IconData icon) {
-    return Container(
-      height: 35.0,
-      width: 35.0,
-      decoration: const BoxDecoration(
-        color: AppColors.bluishWhite,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            blurRadius: 25.0,
-            spreadRadius: -5.0,
-            color: Colors.black45,
-          )
-        ],
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon),
-    );
-  }
-
-  double getPizzaSize(PizzaSize size) {
-    switch (size) {
-      case PizzaSize.medium:
-        return 215;
-      case PizzaSize.small:
-        return 180;
-      case PizzaSize.large:
-        return 250;
-    }
-  }
-
-  double getPizzaPrice(PizzaSize size) {
-    switch (size) {
-      case PizzaSize.medium:
-        return 0;
-      case PizzaSize.small:
-        return -3;
-      case PizzaSize.large:
-        return 3;
-    }
-  }
-
-  Widget _buildPrice(double value, bool? rightSwipe, PizzaSize? oldPizzaSize,
-      PizzaState state) {
-    double oldToppingPrice = 0.0,
-        newToppingPrice = 0.0;
-    if (rightSwipe == null) {
-      for (final topping in pizzaCubit.toppingList) {
-        if (topping.selected) {
-          oldToppingPrice += topping.price;
-        }
-      }
-    }
-    newToppingPrice = oldToppingPrice;
-    if (state.runtimeType == PizzaToppingChangeState) {
-      if ((state as PizzaToppingChangeState).added) {
-        oldToppingPrice -= state.topping.price;
-      } else {
-        newToppingPrice -= state.topping.price;
-      }
-    }
-    final oldPrice = pizzaCubit.pizzaList[pizzaCubit.selectedPizza].price +
-        (oldPizzaSize != null ? getPizzaPrice(oldPizzaSize) : 0) +
-        oldToppingPrice;
-
-    final changedPizzaPrice = (rightSwipe != null
-        ? pizzaCubit
-        .pizzaList[pizzaIndex!]
-        .price
-        : (pizzaCubit.pizzaList[pizzaCubit.selectedPizza].price)) +
-        (getPizzaPrice(pizzaCubit.pizzaSize)) +
-        newToppingPrice;
-
-    final interpolate = oldPrice != changedPizzaPrice
-        ? (oldPrice + (changedPizzaPrice - oldPrice) * value)
-        : oldPrice;
-
-    return Text(
-      '\$${interpolate.toStringAsFixed(2)}',
-      style: AppFonts.pizzaPriceFont,
-    );
-  }
-
-  Widget _addToCartButton() {
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 35.0),
+      padding: EdgeInsets.only(bottom: 35.0.toSize(context)),
       child: Container(
-        height: 50.0,
-        width: 170.0,
+        height: 50.0.toSize(context),
+        width: 170.0.toSize(context),
         decoration: const BoxDecoration(
           color: AppColors.brown,
           boxShadow: <BoxShadow>[
@@ -672,135 +738,60 @@ class _HomePageState extends State<HomePage>
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Icon(
+            Icon(
               Icons.shopping_cart_rounded,
               color: Colors.white,
-              size: 30,
+              size: 30.toSize(context),
             ),
             const SizedBox(width: 20.0),
             Text(
-              'Add To Cart',
+              AppStrings.addToCart,
               style: GoogleFonts.poppins(
-                  color: Colors.white,
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w500),
-            )
+                color: Colors.white,
+                fontSize: 16.0.toSize(context),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildToppingView() {
-    return BlocBuilder<PizzaCubit, PizzaState>(
-      bloc: pizzaCubit,
-      buildWhen: (prev, current) {
-        if (current.runtimeType == PizzaToppingChangeState ||
-            pizzaCubit.toppings.isEmpty) {
-          return true;
-        }
-        return false;
-      },
-      builder: (context, state) {
-        return Stack(
-          children: [
-            for (Topping topping in pizzaCubit.toppings)
-              FutureBuilder<ui.Image>(
-                  future: Future(() async {
-                    final ByteData data =
-                    await rootBundle.load(topping.unitImg);
-                    final Completer<ui.Image> completer = Completer();
-                    ui.decodeImageFromList(Uint8List.view(data.buffer),
-                            (ui.Image img) {
-                          return completer.complete(img);
-                        });
-                    return completer.future;
-                  }),
-                  key: ValueKey(topping.img),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return TweenAnimationBuilder(
-                        key: ValueKey(topping.img),
-                        tween: Tween<double>(begin: 0, end: 1),
-                        builder: (context, double value, child) {
-                          return CustomPaint(
-                            painter: TopperPainter(
-                              deviceWidth:
-                              MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width
-                                  .toInt(),
-                              deviceHeight:
-                              MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height
-                                  .toInt(),
-                              img: snapshot.data!,
-                              value: value,
-                              positions: topping.positions,
-                              pizzaSize: getPizzaSize(pizzaCubit.pizzaSize),
-                            ),
-                          );
-                        },
-                        duration: const Duration(milliseconds: 600),
-                        curve: Curves.decelerate,
-                      );
-                    }
-                    return Container();
-                  })
-          ],
-        );
-      },
-    );
-  }
-
-  Duration getTweenAnimationDuration(PizzaState state, bool? rightSwipe) {
-    if (rightSwipe != null) {
-      return pizzaChangingDuration;
-    }
-    switch (state.runtimeType) {
-      case PizzaChangeSizeState:
-        return const Duration(milliseconds: 800);
-      case PizzaToppingChangeState:
-        return const Duration(milliseconds: 500);
-      default:
-        return const Duration(seconds: 0);
-    }
   }
 }
 
-class SizeButton extends StatelessWidget {
-  const SizeButton({Key? key,
-    required this.onTap,
-    required this.text,
-    required this.isSelected})
-      : super(key: key);
-  final void Function() onTap;
-  final bool isSelected;
-  final String text;
+class _CircularButton extends StatelessWidget {
+  const _CircularButton({Key? key, required this.icon}) : super(key: key);
+
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        onTap.call();
-      },
-      child: PhysicalModel(
-        elevation: 2,
-        color: Colors.white,
+    return Container(
+      height: 35.0.toSize(context),
+      width: 35.0.toSize(context),
+      decoration: const BoxDecoration(
+        color: AppColors.bluishWhite,
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            blurRadius: 25.0,
+            spreadRadius: -5.0,
+            color: Colors.black45,
+          )
+        ],
         shape: BoxShape.circle,
-        child: CircleAvatar(
-          backgroundColor: Colors.white,
-          radius: 24,
-          child: Text(
-            text,
-            style: GoogleFonts.playfairDisplay(
-                fontSize: 18.0, color: Colors.grey.shade600),
-          ),
-        ),
       ),
+      child: Icon(icon),
     );
+  }
+}
+
+double _getPizzaSize(PizzaSize size, BuildContext context) {
+  switch (size) {
+    case PizzaSize.small:
+      return 160.toSize(context);
+    case PizzaSize.medium:
+      return 195.toSize(context);
+    case PizzaSize.large:
+      return 230.toSize(context);
   }
 }

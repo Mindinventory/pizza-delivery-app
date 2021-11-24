@@ -62,8 +62,8 @@ class _CurvedCarouselState extends State<CurvedCarousel>
   Widget build(BuildContext context) {
     return SwipeDetector(
       threshold: 10,
-      onSwipe: (bool) {
-        if (!bool) {
+      onSwipe: (value) {
+        if (!value) {
           // if user swipes right to left side
           if (_viewPortIndex + _visibleItemsCount < widget.itemCount ||
               !widget.disableInfiniteScrolling) {
@@ -97,7 +97,9 @@ class _CurvedCarouselState extends State<CurvedCarousel>
                     angle: getAngle(i, _itemWidth, value),
                     scale: getItemScale(i, value),
                     child: widget.itemBuilder(
-                        context, (i + _viewPortIndex) % widget.itemCount),
+                      context,
+                      (i + _viewPortIndex) % widget.itemCount,
+                    ),
                   ),
                 if (_forward != null && _forward! && value < 0.9)
                   AnimatedItem(
@@ -108,7 +110,9 @@ class _CurvedCarouselState extends State<CurvedCarousel>
                     angle: getAngle(-1, _itemWidth, value),
                     scale: getItemScale(-1, value),
                     child: widget.itemBuilder(
-                        context, (_viewPortIndex - 1) % widget.itemCount),
+                      context,
+                      (_viewPortIndex - 1) % widget.itemCount,
+                    ),
                   ),
                 if (_forward != null && !_forward! && value < 0.9)
                   AnimatedItem(
@@ -119,10 +123,10 @@ class _CurvedCarouselState extends State<CurvedCarousel>
                     angle: getAngle(_visibleItemsCount, _itemWidth, value),
                     scale: getItemScale(_visibleItemsCount, value),
                     child: widget.itemBuilder(
-                        context,
-                        (_viewPortIndex + _visibleItemsCount) %
-                            widget.itemCount),
-                  )
+                      context,
+                      (_viewPortIndex + _visibleItemsCount) % widget.itemCount,
+                    ),
+                  ),
               ],
             );
           },
@@ -159,7 +163,10 @@ class _CurvedCarouselState extends State<CurvedCarousel>
   double getCurveY(int i, double itemWidth, double value) {
     if (_forward != null) {
       return interpolate(
-          getCurvePoint(i + (_forward! ? 1 : -1)), getCurvePoint(i), value);
+        getCurvePoint(i + (_forward! ? 1 : -1)),
+        getCurvePoint(i),
+        value,
+      );
     }
     return getCurvePoint(i);
   }
@@ -175,7 +182,10 @@ class _CurvedCarouselState extends State<CurvedCarousel>
   double getAngle(int i, double itemWidth, double value) {
     if (_lastViewPortIndex != -1) {
       return interpolate(
-          getAngleValue(i + (_forward! ? 1 : -1)), getAngleValue(i), value);
+        getAngleValue(i + (_forward! ? 1 : -1)),
+        getAngleValue(i),
+        value,
+      );
     }
     return getAngleValue(i);
   }

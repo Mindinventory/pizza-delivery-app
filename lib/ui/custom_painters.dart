@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pizza_delivery/extensions/dimension_extension.dart';
 
 class CurveLinePainter extends CustomPainter {
   final painter = Paint();
@@ -34,18 +35,29 @@ class Pos {
 }
 
 class TopperPainter extends CustomPainter {
+  TopperPainter({
+    required this.pizzaSize,
+    required this.deviceWidth,
+    required this.deviceHeight,
+    required this.img,
+    required this.positions,
+    required this.value,
+    required this.context,
+  });
+
   final ui.Image img;
   final List<Pos> positions;
   final double pizzaSize;
   final double value;
   final int deviceWidth, deviceHeight;
   final Paint painter = Paint();
+  final BuildContext context;
 
   @override
   void paint(Canvas canvas, Size size) async {
     final pizzaRadius = pizzaSize / 2;
     final centerX = (deviceWidth - 10) / 2;
-    const centerY = 70 + (350 / 2);
+    final centerY = 55.toSize(context) + ((350.toSize(context)) / 2);
     final valueSquare = value * value;
     for (int j = 0; j < positions.length; j++) {
       final double value = valueSquare * positions[j].velocity < 1
@@ -59,36 +71,24 @@ class TopperPainter extends CustomPainter {
               centerY;
       if (value < 1) {
         painter.imageFilter = ui.ImageFilter.blur(
-            sigmaX: (1 - value) * 5, sigmaY: (1 - value) * 5);
+          sigmaX: (1 - value) * 5,
+          sigmaY: (1 - value) * 5,
+        );
       }
 
-      final double x2 = interpolate(startX ,positions[j].x,value);
-      final double y2 = interpolate(startY ,positions[j].y,value);
-      // canvas.drawShadow(Path() .. addRect(Rect.fromLTRB(x2, y2, x2+(1.2-value)*70,y2+(1.2-value)*70)), Colors.grey.shade100.withOpacity(0.2), 5, true);
-      // canvas.drawCircle(Offset(x2,y2), 2, painter);
-      // canvas.rotate(j*pi/3);
-      final inter=interpolate(1.2, 0.2, value);
+      final double x2 =
+          interpolate(startX, positions[j].x, value);
+      final double y2 =
+          interpolate(startY, positions[j].y, value);
+      final inter = interpolate(1.2, 0.2, value);
       canvas.drawImageRect(
-          img,
-          Rect.fromLTRB(0, 0, img.width.toDouble(), img.height.toDouble()),
-          Rect.fromLTRB(x2, y2, x2 + img.width* inter,
-              y2 + img.height*inter),
-          painter);
-      // canvas.drawAtlas(img, [
-      //   RSTransform.fromComponents(rotation: j*30, scale: 0, anchorX: 0, anchorY: 0, translateX: 0, translateY: 0)
-      // ], [Rect.fromLTRB(x2, y2, x2 + img.width* inter,
-      //       y2 + img.height*inter)], [],null, null, paint)
-       }
+        img,
+        Rect.fromLTRB(0, 0, img.width.toDouble(), img.height.toDouble()),
+        Rect.fromLTRB(x2, y2, x2 + img.width * inter, y2 + img.height * inter),
+        painter,
+      );
+    }
   }
-
-  TopperPainter({
-    required this.pizzaSize,
-    required this.deviceWidth,
-    required this.deviceHeight,
-    required this.img,
-    required this.positions,
-    required this.value,
-  });
 
   double interpolate(num a, num b,double progress){
     return (a - (3*progress*progress-progress-1) * (a - b));
@@ -103,7 +103,6 @@ class TopperPainter extends CustomPainter {
     final x2 = rect.left;
     final y2 = rect.top;
     rect.translate(-x2, -y2);
-    // 𝑥cos𝜃−𝑦sin𝜃 ,𝑥sin𝜃+𝑦cos𝜃)
     return Rect.fromPoints(rotatePoint(rect.left, rect.top, radian),
         rotatePoint(rect.right, rect.bottom, radian))
       ..translate(x2, y2);

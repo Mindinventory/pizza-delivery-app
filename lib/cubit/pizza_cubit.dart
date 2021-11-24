@@ -4,6 +4,10 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:meta/meta.dart';
+import 'package:pizza_delivery/core/res/app_assets.dart';
+import 'package:pizza_delivery/core/res/app_strings.dart';
+import 'package:pizza_delivery/extensions/context_extension.dart';
+import 'package:pizza_delivery/extensions/dimension_extension.dart';
 import 'package:pizza_delivery/ui/custom_painters.dart';
 import 'package:pizza_delivery/viewmodel/pizza_viewmodel.dart';
 
@@ -14,132 +18,111 @@ class PizzaCubit extends Cubit<PizzaState> {
 
   final List<PizzaViewModel> pizzaList = [
     PizzaViewModel(
-        name: 'Pizza 1',
-        description: 'This pizza is very tasty',
-        imgPath: 'assets/images/pizza1.png',
-        price: 6.00),
+      name: AppStrings.pizza1,
+      description: AppStrings.pizzaDes1,
+      imgPath: AppAssets.pizza1,
+      price: 6.00,
+    ),
     PizzaViewModel(
-        name: 'Pizza 2',
-        description: 'This pizza is very delicious',
-        imgPath: 'assets/images/pizza2.png',
-        price: 7.00),
-    // PizzaViewModel(
-    //     name: 'Pizza 3',
-    //     description: 'This pizza is very amazing',
-    //     imgPath: 'assets/images/pizza3.png',
-    //     price: 15.0),
-    // PizzaViewModel(
-    //     name: 'Pizza 4',
-    //     description: 'This pizza is very delicious',
-    //     imgPath: 'assets/images/pizza4.png',
-    //     price: 5.00),
-    // PizzaViewModel(
-    //     name: 'Pizza 5',
-    //     description: 'This pizza is very delicious',
-    //     imgPath: 'assets/images/pizza5.png',
-    //     price: 20.00),
-    // PizzaViewModel(
-    //     name: 'Pizza 6',
-    //     description: 'This pizza is very delicious',
-    //     imgPath: 'assets/images/pizza6.png',
-    //     price: 13.00),
+      name: AppStrings.pizza2,
+      description: AppStrings.pizzaDes2,
+      imgPath: AppAssets.pizza2,
+      price: 7.00,
+    ),
+    PizzaViewModel(
+      name: AppStrings.pizza3,
+      description: AppStrings.pizzaDes3,
+      imgPath: AppAssets.pizza3,
+      price: 15.0,
+    ),
+    PizzaViewModel(
+      name: AppStrings.pizza4,
+      description: AppStrings.pizzaDes4,
+      imgPath: AppAssets.pizza4,
+      price: 5.00,
+    ),
+    PizzaViewModel(
+      name: AppStrings.pizza5,
+      description: AppStrings.pizzaDes4,
+      imgPath: AppAssets.pizza5,
+      price: 20.00,
+    ),
+    PizzaViewModel(
+      name: AppStrings.pizza6,
+      description: AppStrings.pizzaDes4,
+      imgPath: AppAssets.pizza6,
+      price: 13.00,
+    ),
   ];
   final List<ToppingItemModel> toppingList = [
-    // 'assets/images/toppings/green_peppers_thumb.png',
-    // 'assets/images/toppings/halloumi_thumb.png',
-    // 'assets/images/toppings/mushrooms_thumb.png',
-    // 'assets/images/toppings/olives_thumb.png',
-    // 'assets/images/toppings/onions_thumb.png',
-    // 'assets/images/toppings/pineapples_thumb.png',
-    // 'assets/images/toppings/sweetcorn_thumb.png',
-    // 'assets/images/toppings/tomatos_thumb.png',
-
-    ToppingItemModel('name', 'assets/images/toppings/green_chillies_thumb.png',
-        'assets/images/toppings/unit/green_chillies_thumb.png', 100, 7),
-
-    ToppingItemModel('name', 'assets/images/toppings/onions_thumb.png',
-        'assets/images/toppings/unit/onions_thumb_unit.png', 90, 4),
-    ToppingItemModel('name', 'assets/images/toppings/pineapples_thumb.png',
-        'assets/images/toppings/unit/pineapples_thumb_unit.png', 200, 2),
-    ToppingItemModel('name', 'assets/images/toppings/halloumi_thumb.png',
-        'assets/images/toppings/unit/halloumi_thumb_unit.png', 80, 0.7),
-
-    ToppingItemModel('name', 'assets/images/toppings/mushrooms_thumb.png',
-        'assets/images/toppings/unit/mushrooms_thumb.png', 30, 2),
-
-    ToppingItemModel('name', 'assets/images/toppings/sweetcorn_thumb.png',
-        'assets/images/toppings/unit/sweetcorn_thumb_unit.png', 90, 0.5),
-
-    //duplicate
-    //
-    //  ToppingItemModel('name', 'assets/images/toppings/pineapples_thumb.png',
-    //     'assets/images/toppings/unit/pineapples_thumb_unit.png', 100,2),
-    // ToppingItemModel('name', 'assets/images/toppings/halloumi_thumb.png',
-    //     'assets/images/toppings/unit/halloumi_thumb_unit.png', 80,0.7),
-    //
-    //
-    // ToppingItemModel('name', 'assets/images/toppings/mushrooms_thumb.png',
-    //     'assets/images/toppings/unit/mushrooms_thumb.png', 30,2),
-    //
-    //
-    //
-    // ToppingItemModel('name', 'assets/images/toppings/sweetcorn_thumb.png',
-    //     'assets/images/toppings/unit/sweetcorn_thumb_unit.png', 90,0.5),
-    //
-    //
-    // ToppingItemModel('name', 'assets/images/toppings/pineapples_thumb.png',
-    //     'assets/images/toppings/unit/pineapples_thumb_unit.png', 100,2),
-    // ToppingItemModel('name', 'assets/images/toppings/halloumi_thumb.png',
-    //     'assets/images/toppings/unit/halloumi_thumb_unit.png', 80,0.7),
-    //
-    //
-    // ToppingItemModel('name', 'assets/images/toppings/mushrooms_thumb.png',
-    //     'assets/images/toppings/unit/mushrooms_thumb.png', 30,2),
-    //
-    //
-    //
-    // ToppingItemModel('name', 'assets/images/toppings/sweetcorn_thumb.png',
-    //     'assets/images/toppings/unit/sweetcorn_thumb_unit.png', 90,0.5),
-    //
-    //
-    // ToppingItemModel('name', 'assets/images/toppings/pineapples_thumb.png',
-    //     'assets/images/toppings/unit/pineapples_thumb_unit.png', 100,2),
-    // ToppingItemModel('name', 'assets/images/toppings/halloumi_thumb.png',
-    //     'assets/images/toppings/unit/halloumi_thumb_unit.png', 80,0.7),
-    //
-    //
-    // ToppingItemModel('name', 'assets/images/toppings/mushrooms_thumb.png',
-    //     'assets/images/toppings/unit/mushrooms_thumb.png', 30,2),
-    //
-    //
-    //
-    // ToppingItemModel('name', 'assets/images/toppings/sweetcorn_thumb.png',
-    //     'assets/images/toppings/unit/sweetcorn_thumb_unit.png', 90,0.5),
+    ToppingItemModel(
+      'name',
+      AppAssets.greenChilliesThumb,
+      AppAssets.unitGreenChilliesThumb,
+      100,
+      7,
+    ),
+    ToppingItemModel(
+      'name',
+      AppAssets.onionsThumb,
+      AppAssets.unitOnionsThumb,
+      90,
+      4,
+    ),
+    ToppingItemModel(
+      'name',
+      AppAssets.pineapplesThumb,
+      AppAssets.unitPineapplesThumb,
+      200,
+      2,
+    ),
+    ToppingItemModel(
+      'name',
+      AppAssets.halloumiThumb,
+      AppAssets.unitHalloumiThumb,
+      80,
+      0.7,
+    ),
+    ToppingItemModel(
+      'name',
+      AppAssets.mushroomsThumb,
+      AppAssets.unitMushroomsThumb,
+      30,
+      2,
+    ),
+    ToppingItemModel(
+      'name',
+      AppAssets.sweetcornThumb,
+      AppAssets.unitSweetcornThumb,
+      90,
+      0.5,
+    ),
   ];
   PizzaSize pizzaSize = PizzaSize.medium;
   int selectedPizza = 0;
 
   PizzaCubit() : super(PizzaInitial());
 
-  double getPizzaSize(PizzaSize size) {
+  double _getPizzaSize(PizzaSize size, BuildContext context) {
     switch (size) {
-      case PizzaSize.medium:
-        return 230;
       case PizzaSize.small:
-        return 200;
+        return 160.toSize(context);
+      case PizzaSize.medium:
+        return 195.toSize(context);
       case PizzaSize.large:
-        return 280;
+        return 230.toSize(context);
     }
   }
 
   void addTopping(BuildContext context, ToppingItemModel toppingItemModel) {
     final random = Random.secure();
-    final deviceWidth = MediaQuery.of(context).size.width;
-    final calculatedPizzaSize = getPizzaSize(pizzaSize);
-    const centerY = 70 + (350 / 2) - 5;
-    final startingXofPizza = (deviceWidth / 2) - (calculatedPizzaSize / 2);
-    final startingYOfPizza = 70 + ((350 - calculatedPizzaSize) / 2);
-    final rSquare = (calculatedPizzaSize - 40) * (calculatedPizzaSize - 40) / 4;
+    final deviceWidth = context.width;
+    final calculatedPizzaSize = _getPizzaSize(pizzaSize, context);
+    final centerY = (((context.width < 394) ? 30.toSize(context) : 55.toSize(context)) + (345.toSize(context) / 2));
+    final startingXofPizza = ((deviceWidth / 2) - (calculatedPizzaSize / 2));
+    final startingYOfPizza = ((context.width < 394) ? 30.toSize(context) : 55.toSize(context)) + ((340.toSize(context) - calculatedPizzaSize) / 2);
+    final rSquare = (calculatedPizzaSize - (40.toSize(context))) * (calculatedPizzaSize - (40.toSize(context))) / 4;
+
     toppings.add(
       Topping(
         toppingItemModel.name,
@@ -148,18 +131,9 @@ class PizzaCubit extends Cubit<PizzaState> {
         List.generate(toppingItemModel.limit, (index) {
           late int x, y;
           do {
-            x = (startingXofPizza +
-                    (calculatedPizzaSize.toInt() *
-                        random.nextInt(5000) /
-                        5000.0))
-                .toInt();
-            y = (startingYOfPizza +
-                    (calculatedPizzaSize.toInt() *
-                        random.nextInt(5000) /
-                        5000.0))
-                .toInt();
-          } while (pow(((deviceWidth - 25) / 2) - x, 2) + pow(centerY - y, 2) >
-              rSquare);
+            x = (startingXofPizza + (calculatedPizzaSize.toInt() * random.nextInt(5000) / 5000.0)).toInt();
+            y = (startingYOfPizza + (calculatedPizzaSize.toInt() * random.nextInt(5000) / 5000.0)).toInt();
+          } while (pow(((deviceWidth - 25) / 2) - x, 2) + pow(centerY - y, 2) > rSquare);
           return Pos(x, y, (100 + (random.nextInt(5000)/100)) / 100.0);
         }),
       ),

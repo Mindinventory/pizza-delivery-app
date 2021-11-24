@@ -1,1 +1,1 @@
-const pizzaChangingDuration=Duration(milliseconds: 700);
+const pizzaChangingDuration = Duration(milliseconds: 700);
