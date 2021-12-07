@@ -6,37 +6,50 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pizza_delivery/cubit/pizza_cubit.dart';
 import 'package:pizza_delivery/extensions/dimension_extension.dart';
 import 'package:pizza_delivery/ui/curve_carousel/curve_carousel.dart';
+import 'package:pizza_delivery/viewmodel/pizza_viewmodel.dart';
 
 class PizzaToppingListView extends StatelessWidget {
   final PageController pageController = PageController(viewportFraction: 0.2);
 
   PizzaToppingListView({Key? key}) : super(key: key);
-
+  List<ToppingItemModel> listItem = <ToppingItemModel>[];
   @override
   Widget build(BuildContext context) {
-    final listItem = BlocProvider.of<PizzaCubit>(context, listen: false).toppingList;
-
-    return FractionallySizedBox(
-      widthFactor: 1,
-      child: CurvedCarousel(
-        itemBuilder: (context, i) {
-          return ToppingItem(
-            img: listItem[i].img,
-            selectionChange: (value) {
-              listItem[i].selected = value;
-              if (value) {
-                BlocProvider.of<PizzaCubit>(context).addTopping(context, listItem[i]);
-              } else {
-                BlocProvider.of<PizzaCubit>(context).removeTopping(listItem[i]);
-              }
-            },
-            selected: listItem[i].selected,
-            key: ValueKey(listItem[i].selected),
-          );
-        },
-        itemCount: listItem.length,
-        middleItemScaleRatio: 1.5,
-      ),
+    listItem = BlocProvider.of<PizzaCubit>(context, listen: false).toppingList;
+    return BlocConsumer<PizzaCubit, PizzaState>(
+      listener: (context, state) {
+        if (state is PizzaChangedState) {
+          for (int i = 0; i < listItem.length; i++) {
+            listItem[i].selected = false;
+          }
+        }
+      },
+      builder: (context, state) {
+        return FractionallySizedBox(
+        widthFactor: 1,
+        child: CurvedCarousel(
+          itemBuilder: (context, i) {
+            return ToppingItem(
+              img: listItem[i].img,
+              selectionChange: (value) {
+                listItem[i].selected = value;
+                if (value) {
+                  BlocProvider.of<PizzaCubit>(context)
+                      .addTopping(context, listItem[i]);
+                } else {
+                  BlocProvider.of<PizzaCubit>(context)
+                      .removeTopping(listItem[i]);
+                }
+              },
+              selected: listItem[i].selected,
+              key: ValueKey(listItem[i].selected),
+            );
+          },
+          itemCount: listItem.length,
+          middleItemScaleRatio: 1.5,
+        ),
+      );
+      }
     );
   }
 }
